@@ -1,0 +1,1 @@
+{"rewrites":[{"destination":"/api/index.js?__p=/api/:path*","source":"/api/:path*"}]}

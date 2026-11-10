@@ -178,7 +178,7 @@ async function upsertMatch(m) {
 
 async function fetchDay(slug, ymd) {
   const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${slug}/scoreboard?dates=${ymd}&limit=100`, {
-    headers: { 'User-Agent': 'Oddaroa/1.0' },
+    headers: { 'User-Agent': 'StakePro/1.0' },
     signal: AbortSignal.timeout(8000),
   });
   if (!r.ok) throw new Error('espn_' + r.status);

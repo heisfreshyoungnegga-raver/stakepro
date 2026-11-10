@@ -1,8 +1,12 @@
-const { sql, matchesById, send, guard, requireAuth, getSettings, cashoutQuoteFor, isCustomMatch, customMatchState, livePriceFor, currentPickOdds } = require('../../_lib');
+const { sql, matchesById, send, guard, requireAuth, getSettings, cashoutQuoteFor, isCustomMatch, customMatchState, livePriceFor, currentPickOdds, ensureBetColumns } = require('../../_lib');
 
 module.exports = guard(async (req, res) => {
   const auth = requireAuth(req, res);
   if (!auth) return;
+  // The select names kind/bonus_pct/system_label/booking_code, which
+  // a fresh DB only gains via ensureBetColumns — run it here too, or
+  // My Bets 500s until the first bet is placed platform-wide.
+  await ensureBetColumns();
   const rows = await sql(
     `select b.id, b.code, b.booking_code, b.stake_ghs, b.total_odds, b.potential_ghs, b.status, b.placed_at, b.settled_at, b.kind, b.bonus_pct, b.system_label, b.payout_ghs,
             coalesce(json_agg(json_build_object(

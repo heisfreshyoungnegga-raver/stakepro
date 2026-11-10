@@ -1,9 +1,10 @@
-const { sql, matchesById, send, guard } = require('../../_lib');
+const { sql, matchesById, send, guard, ensureBetColumns } = require('../../_lib');
 
 // Public ticket check: status and selections only, no account data.
 module.exports = guard(async (req, res) => {
   const code = String((req.query && req.query.code) || '').trim().toUpperCase();
   if (!code) return send(res, 400, { error: 'code_required' });
+  await ensureBetColumns(); // kind/bonus_pct/system_label selected below
   const rows = await sql(
     `select b.code, b.stake_ghs, b.total_odds, b.potential_ghs, b.status, b.placed_at, b.kind, b.bonus_pct, b.system_label,
             s.match_id, s.market, s.pick, s.odds, s.result

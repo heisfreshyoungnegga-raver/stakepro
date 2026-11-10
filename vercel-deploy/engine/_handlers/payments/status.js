@@ -12,7 +12,7 @@ module.exports = guard(async (req, res) => {
   if (!reference) return send(res, 400, { error: 'reference_required' });
   await ensurePaymentTables();
   const rows = await sql(
-    `select reference, intent_id, amount_ghs, plan, status from payment_attempts where reference = $1 and user_id = $2`,
+    `select reference, intent_id, amount_ghs, status from payment_attempts where reference = $1 and user_id = $2`,
     [reference, auth.uid]
   );
   if (!rows.length) return send(res, 404, { error: 'attempt_not_found' });
@@ -38,5 +38,5 @@ module.exports = guard(async (req, res) => {
     const me = await sql('select * from users where id = $1', [auth.uid]);
     if (me.length) vip = publicUser(me[0]);
   }
-  send(res, 200, { reference, status: a.status, network_status: networkStatus, amount_ghs: Number(a.amount_ghs), plan: a.plan, vip });
+  send(res, 200, { reference, status: a.status, network_status: networkStatus, amount_ghs: Number(a.amount_ghs), plan: null, vip });
 });

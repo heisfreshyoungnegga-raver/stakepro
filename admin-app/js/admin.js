@@ -75,6 +75,14 @@ async function api(path, opts = {}) {
     state.offline = true;
     throw new Error('Backend not configured yet — set DATABASE_URL and SESSION_SECRET in Vercel first.');
   }
+  if (res.status === 401 && state.token) {
+    // Session expired mid-shift: clear it and bounce to the login
+    // form instead of leaving a dead dashboard on screen.
+    state.token = ''; state.user = null;
+    localStorage.removeItem('sp_admin_token');
+    render();
+    throw new Error('Session expired — please log in again.');
+  }
   if (!res.ok) throw new Error(data.detail || data.error || 'request_failed');
   return data;
 }

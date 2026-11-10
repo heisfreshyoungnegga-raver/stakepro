@@ -16,6 +16,9 @@ module.exports = guard(async (req, res) => {
     return send(res, 400, { error: 'invalid_selections' });
   }
   const ids = [...new Set(clean.map(s => s.match_id))];
+  if (ids.some(id => !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))) {
+    return send(res, 400, { error: 'unknown_match' });
+  }
   const found = await msql('select id from matches where id = any($1::uuid[])', [ids]);
   if (found.length !== ids.length) return send(res, 400, { error: 'unknown_match' });
   // One unique code per account + games (Prince, 2026-11-06): a

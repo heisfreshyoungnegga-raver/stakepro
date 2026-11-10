@@ -86,8 +86,10 @@ module.exports = guard(async (req, res) => {
   // swallowed. While no API-Football key is configured the list is
   // simply the ESPN block, exactly as before.
   const af = afEnabled();
-  if (af) await maybeRefreshAf().catch(() => {});
+  // Columns BEFORE the AF refresh: its upsert writes score_home_ht /
+  // score_away_ht, which a fresh DB only gains here (go-live audit).
   await ensureMatchColumns().catch(() => {});
+  if (af) await maybeRefreshAf().catch(() => {});
   await maybeRefreshLive().catch(() => {});
   if (listCache.body && Date.now() - listCache.at < 20000) return send(res, 200, listCache.body);
   // Settle bets on matches the feeds have just finished (throttled

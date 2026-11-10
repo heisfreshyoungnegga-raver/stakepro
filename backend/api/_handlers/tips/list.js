@@ -1,9 +1,10 @@
 // GET /api/tips — official Oddaroa tips from the database.
 // Free tips are public. VIP tips come back locked ({locked:true}, no
 // pick) unless the caller is logged in with active VIP or an admin role.
-const { sql, send, verifyToken, guard } = require('../../_lib');
+const { sql, send, verifyToken, guard, ensureTipsTables } = require('../../_lib');
 
 module.exports = guard(async (req, res) => {
+  await ensureTipsTables().catch(() => {}); // tips table + users.vip_until self-heal
   const settings = await sql("select value from operator_settings where key = 'tips_enabled'");
   if (settings.length && settings[0].value !== 'true') return send(res, 200, { tips: [], disabled: true });
 

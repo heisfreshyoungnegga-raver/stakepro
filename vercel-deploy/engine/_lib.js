@@ -11,8 +11,17 @@ function config() {
 function missingConfig() {
   const c = config();
   const missing = [];
-  if (!c.databaseUrl) missing.push('DATABASE_URL');
-  if (!c.sessionSecret) missing.push('SESSION_SECRET');
+  // A malformed DATABASE_URL or a trivially short SESSION_SECRET must
+  // surface as the clean 503 'backend_not_configured' at first boot,
+  // not as cryptic per-request 500s (URL parse throws) or silently
+  // forgeable session tokens (go-live audit, 2026-11-10).
+  let urlOk = false;
+  try {
+    const u = new URL(c.databaseUrl);
+    urlOk = (u.protocol === 'postgres:' || u.protocol === 'postgresql:') && !!u.host;
+  } catch (e) { urlOk = false; }
+  if (!urlOk) missing.push('DATABASE_URL');
+  if (!c.sessionSecret || c.sessionSecret.length < 16) missing.push('SESSION_SECRET');
   return missing;
 }
 
@@ -62,7 +71,8 @@ function verifyPassword(password, stored) {
   const [salt, hash] = String(stored || '').split(':');
   if (!salt || !hash) return false;
   const test = crypto.scryptSync(password, salt, 64).toString('hex');
-  return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(test, 'hex'));
+  const a = Buffer.from(hash, 'hex'), b = Buffer.from(test, 'hex');
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 function signToken(payload) {
@@ -1546,9 +1556,38 @@ function cashoutQuoteFor(bet, legs, marginPct) {
     if (!cur) return null;
     p *= 1 / cur;
   }
-  const margin = Math.min(50, Math.max(0, Number(marginPct) || 0));
+  // Setting absent (fresh DB, ensureAdminTables has not seeded it
+  // yet) means the platform default of 10 — never a silent 0, which
+  // would pay out full value with no house margin.
+  const margin = Math.min(50, Math.max(0, marginPct === undefined || marginPct === null || marginPct === '' ? 10 : Number(marginPct) || 0));
   const value = Math.floor(Number(bet.potential_ghs) * p * (1 - margin / 100) * 100) / 100;
   return value >= 0.10 ? value : null;
+}
+
+// Tips table + users.vip_until: both exist on live Oddaroa (applied
+// straight to that DB) but never landed in any shipped .sql file, so
+// a fresh database 500'd GET /api/tips from its first call — the
+// handler selects from tips and reads vip_until for logged-in
+// players (go-live audit, 2026-11-10). Self-heal like the others.
+let tipsTablesReady = null;
+function ensureTipsTables() {
+  if (!tipsTablesReady) {
+    tipsTablesReady = (async () => {
+      await sql(`alter table users add column if not exists vip_until timestamptz`);
+      await sql(`create table if not exists tips (
+        id uuid primary key default gen_random_uuid(),
+        match text,
+        league text,
+        pick text,
+        odds numeric(10, 3),
+        tier text not null default 'free',
+        result text,
+        play_date date not null default current_date,
+        created_at timestamptz not null default now()
+      )`);
+    })().catch(e => { tipsTablesReady = null; throw e; });
+  }
+  return tipsTablesReady;
 }
 
 // Booking codes (Prince, 2026-11-06): 5-character mixed codes
@@ -1588,4 +1627,4 @@ async function ensureBookingCode(userId, selections) {
   return null;
 }
 
-module.exports = { sql, msql, matchesById, hashPassword, verifyPassword, verifyToken, issueToken, readBody, send, requireAuth, requireAdmin, requireSuperAdmin, guard, publicUser, betCode, MARKETS, keyFor, pickWon, afPickWon, shinobiConfig, shinobiFetch, mapIntentStatus, detectNetwork, ensurePaymentTables, ensureAdminTables, getSettings, applyDepositRewards, settleAttempt, settleFlwAttempt, currencyOfPhone, moneyRules, depositFloorFor, flwConfig, flwFetch, settleMatch, maybeAutoSettle, isCustomMatch, customMatchState, expandOdds, fillOdds, inviteCode, ensureInviteCode, WIN_BONUS, winBonusPct, combinations, ensureBetColumns, ensureMatchColumns, ensureSupportColumns, cleanGoalSchedule, cleanCrestUrl, fullBookFromOdds, cashoutQuoteFor, ensureBookingCode, genBookingCode, livePriceFor, currentPickOdds, convertAmount, firstDepositBonus, splitCommission };
+module.exports = { sql, msql, matchesById, hashPassword, verifyPassword, verifyToken, issueToken, readBody, send, requireAuth, requireAdmin, requireSuperAdmin, guard, publicUser, betCode, MARKETS, keyFor, pickWon, afPickWon, shinobiConfig, shinobiFetch, mapIntentStatus, detectNetwork, ensurePaymentTables, ensureAdminTables, getSettings, applyDepositRewards, settleAttempt, settleFlwAttempt, currencyOfPhone, moneyRules, depositFloorFor, flwConfig, flwFetch, settleMatch, maybeAutoSettle, isCustomMatch, customMatchState, expandOdds, fillOdds, inviteCode, ensureInviteCode, WIN_BONUS, winBonusPct, combinations, ensureBetColumns, ensureMatchColumns, ensureSupportColumns, cleanGoalSchedule, cleanCrestUrl, fullBookFromOdds, cashoutQuoteFor, ensureBookingCode, genBookingCode, ensureTipsTables, livePriceFor, currentPickOdds, convertAmount, firstDepositBonus, splitCommission };

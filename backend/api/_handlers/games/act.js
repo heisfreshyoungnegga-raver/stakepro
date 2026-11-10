@@ -10,6 +10,7 @@ module.exports = guard(async (req, res) => {
   if (!auth) return;
   await G.ensureGameTables();
   const { round_id, zone } = await readBody(req);
+  if (!round_id || !/^[0-9a-f-]{36}$/i.test(String(round_id))) return send(res, 400, { error: 'round_required' });
   if (!Number.isInteger(zone) || zone < 0 || zone > 5) return send(res, 400, { error: 'invalid_zone' });
   const rows = await sql('select * from game_rounds where id = $1 and user_id = $2', [round_id, auth.uid]);
   if (!rows.length) return send(res, 404, { error: 'round_not_found' });

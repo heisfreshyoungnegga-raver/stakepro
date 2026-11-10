@@ -1,4 +1,4 @@
-const { sql, msql, readBody, send, guard, requireAdmin, isCustomMatch, customMatchState, settleMatch } = require('../../_lib');
+const { sql, msql, readBody, send, guard, requireAdmin, isCustomMatch, customMatchState, settleMatch, ensureMatchColumns } = require('../../_lib');
 
 // Settle a finished match manually: resolve the final score (given,
 // stored, or a featured match's scheduled score), stamp it on the
@@ -10,6 +10,9 @@ module.exports = guard(async (req, res) => {
   if (req.method !== 'POST') return send(res, 405, { error: 'method_not_allowed' });
   const auth = requireAdmin(req, res);
   if (!auth) return;
+  // settleMatch reads matches.score_home_ht/score_away_ht, which a
+  // fresh DB only gains via ensureMatchColumns (go-live audit).
+  await ensureMatchColumns().catch(() => {});
   const { match_id, score_home, score_away } = await readBody(req);
   let home = Number(score_home), away = Number(score_away);
   if (!match_id) return send(res, 400, { error: 'match_required' });

@@ -1,4 +1,4 @@
-const { sql, send, guard, requireAuth, settleFlwAttempt } = require('../../_lib');
+const { sql, send, guard, requireAuth, settleFlwAttempt, ensurePaymentTables } = require('../../_lib');
 
 // Flutterwave deposit reconciler (twin of deposit-status): the payer's
 // browser lands back on the site with ?flw_return=1&tx_ref=...&
@@ -13,6 +13,9 @@ module.exports = guard(async (req, res) => {
   const reference = String(q.reference || url.searchParams.get('reference') || '');
   const transactionId = String(q.transaction_id || url.searchParams.get('transaction_id') || '');
   if (!reference) return send(res, 400, { error: 'reference_required' });
+  // Selects payment_attempts.currency — a fresh serverless instance
+  // must run the ensure itself or this poll 500s (go-live audit).
+  await ensurePaymentTables();
   const rows = await sql(
     `select id, user_id, provider, reference, intent_id, amount_ghs, amount_minor, currency, status
      from payment_attempts where reference = $1 and user_id = $2`,

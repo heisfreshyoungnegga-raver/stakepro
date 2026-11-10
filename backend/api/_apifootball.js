@@ -1,4 +1,4 @@
-const { msql: sql } = require('./_lib'); // catalog DB only: matches + operator_settings gates
+const { msql: sql, ensureMatchColumns } = require('./_lib'); // catalog DB only: matches + operator_settings gates
 
 // API-Football (API-Sports) fixture + odds sync — the site's primary
 // data source once API_FOOTBALL_KEY is set in the environment
@@ -294,6 +294,7 @@ async function refreshAfLive() {
 
 // Admin Sync runs the whole programme at once, ungated.
 async function refreshAf() {
+  await ensureMatchColumns().catch(() => {}); // upserts write score_home_ht/away_ht
   const imported = await refreshAfFixtures();
   const { liveImported, priced } = await refreshAfLive();
   return { imported, priced, liveImported };
@@ -314,6 +315,7 @@ async function claimGate(key, ms) {
   return claimed.length > 0;
 }
 async function maybeRefreshAf() {
+  await ensureMatchColumns().catch(() => {});
   let ran = false;
   if (await claimGate('af_fixtures_at', FIXTURES_MS)) { await refreshAfFixtures(); ran = true; }
   if (await claimGate('af_refresh_at', REFRESH_MS)) { await refreshAfLive(); ran = true; }

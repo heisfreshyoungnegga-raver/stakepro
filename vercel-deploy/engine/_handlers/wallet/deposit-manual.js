@@ -14,6 +14,7 @@ module.exports = guard(async (req, res) => {
   const rules = moneyRules(currency);
   const floor = depositFloorFor(urows[0], currency);
   if (!(amount >= floor)) return send(res, 400, { error: 'invalid_amount', detail: `Minimum deposit is ${rules.symbol}${floor.toLocaleString('en-GB')}.` });
+  if (amount > rules.maxDeposit) return send(res, 400, { error: 'invalid_amount', detail: `Maximum deposit is ${rules.symbol}${rules.maxDeposit.toLocaleString('en-GB')}.` });
   if (!external_ref || String(external_ref).trim().length < 4) return send(res, 400, { error: 'transaction_id_required' });
   // Optional transaction screenshot (Prince's ask, 2026-11-03): a
   // data-URL image the client shrank to at most 1280px. Stored on

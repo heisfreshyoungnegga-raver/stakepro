@@ -7,6 +7,7 @@ module.exports = guard(async (req, res) => {
   const auth = requireAdmin(req, res);
   if (!auth) return;
   const { id } = await readBody(req);
+  if (!id || !/^[0-9a-f-]{36}$/i.test(String(id))) return send(res, 400, { error: 'transaction_required' });
   // Withdrawal decisions are super-admin only (Prince's rule,
   // 2026-11-04): approving or rejecting money out sits with the
   // super admin alone, so check the kind before changing anything.

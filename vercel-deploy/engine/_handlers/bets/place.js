@@ -89,6 +89,10 @@ module.exports = guard(async (req, res) => {
   let totalStake = 0;
   let totalPotential = 0;
   for (const t of tickets) {
+    // A stake like 0.001 passes the > 0 check but rounds to 0.00 and
+    // then violates the bets stake check as a 500 — refuse it as a
+    // clean 400 instead (go-live audit, 2026-11-10).
+    if (!(t.stake >= 0.01)) return send(res, 400, { error: 'invalid_stake' });
     t.totalOdds = Math.round(t.sels.reduce((a, s) => a * s.odds, 1) * 1000) / 1000;
     t.bonusPct = t.kind === 'single' ? 0 : winBonusPct(t.sels.length);
     t.potential = Math.round(t.stake * t.totalOdds * (1 + t.bonusPct / 100) * 100) / 100;

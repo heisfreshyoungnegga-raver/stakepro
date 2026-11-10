@@ -22,6 +22,11 @@ module.exports = guard(async (req, res) => {
   await sql('delete from commissions where earner_id = $1 or source_user_id = $1', [id]);
   await sql('delete from wallet_transactions where user_id = $1', [id]);
   await sql('delete from payment_attempts where user_id = $1', [id]);
+  // game_rounds and commission_payout_requests also FK to users —
+  // without these two deletes, deleting any user who ever played a
+  // casino game or requested a payout died on the FK (go-live audit).
+  await sql('delete from game_rounds where user_id = $1', [id]);
+  await sql('delete from commission_payout_requests where earner_id = $1', [id]);
   await sql('delete from support_messages where user_id = $1', [id]);
   await sql('delete from invites where used_by = $1', [id]);
   await sql('update invites set created_by = null where created_by = $1', [id]);

@@ -41,7 +41,7 @@ module.exports = guard(async (req, res) => {
   );
   const attemptId = attemptRows[0].id;
 
-  const host = req.headers['x-forwarded-host'] || req.headers.host || 'oddaroa.com';
+  const host = req.headers['x-forwarded-host'] || req.headers.host || 'stakepro-mu.vercel.app';
   const redirect = `https://${host}/?flw_return=1`;
   let created;
   try {
@@ -52,8 +52,8 @@ module.exports = guard(async (req, res) => {
         amount: amountMinor / 100,
         currency: 'NGN',
         redirect_url: redirect,
-        customer: { email: user.email, phonenumber: user.phone, name: user.display_name || 'Oddaroa player' },
-        customizations: { title: 'Oddaroa', description: 'Wallet deposit' }
+        customer: { email: user.email, phonenumber: user.phone, name: user.display_name || 'StakePro player' },
+        customizations: { title: 'StakePro', description: 'Wallet deposit' }
       }
     });
   } catch (e) {

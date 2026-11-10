@@ -82,7 +82,7 @@ module.exports = guard(async (req, res) => {
         network: net,
         customer: { phone: intl },
         reference,
-        description: 'Oddaroa wallet deposit'
+        description: 'StakePro wallet deposit'
       }
     });
   } catch (e) {

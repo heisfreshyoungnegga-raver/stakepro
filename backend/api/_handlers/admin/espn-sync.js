@@ -1,4 +1,4 @@
-const { readBody, send, guard, requireSuperAdmin } = require('../../_lib');
+const { readBody, send, guard, requireSuperAdmin, ensureMatchColumns } = require('../../_lib');
 const { LEAGUES, syncLeagues } = require('../../_espn');
 const { afEnabled, refreshAf } = require('../../_apifootball');
 
@@ -11,6 +11,7 @@ module.exports = guard(async (req, res) => {
   if (req.method !== 'POST') return send(res, 405, { error: 'method_not_allowed' });
   const auth = requireSuperAdmin(req, res);
   if (!auth) return;
+  await ensureMatchColumns().catch(() => {}); // AF upsert writes HT score columns
   if (afEnabled()) {
     const { imported, priced } = await refreshAf();
     return send(res, 200, { ok: true, source: 'api-football', imported, priced });

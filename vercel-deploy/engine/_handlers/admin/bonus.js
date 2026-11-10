@@ -11,7 +11,7 @@ module.exports = guard(async (req, res) => {
   const { scope, user_id, amount_ghs, note } = await readBody(req);
   const amount = Math.round(Number(amount_ghs) * 100) / 100;
   if (!(amount > 0) || amount > 10000) return send(res, 400, { error: 'invalid_amount' });
-  const noteText = note ? String(note).slice(0, 120) : 'Bonus from Oddaroa';
+  const noteText = note ? String(note).slice(0, 120) : 'Bonus from StakePro';
   let rows;
   if (scope === 'all') {
     rows = await sql(

@@ -18,7 +18,10 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return send(res, 405, { error: 'method_not_allowed' });
   const { webhookHash, secretKey } = flwConfig();
   if (!process.env.DATABASE_URL || !webhookHash || !secretKey) return send(res, 503, { error: 'not_configured' });
-  if (String(req.headers['verif-hash'] || '') !== webhookHash) return send(res, 401, { error: 'invalid_hash' });
+  const gotHash = String(req.headers['verif-hash'] || '');
+  const hashOk = gotHash.length === String(webhookHash).length
+    && require('crypto').timingSafeEqual(Buffer.from(gotHash), Buffer.from(String(webhookHash)));
+  if (!hashOk) return send(res, 401, { error: 'invalid_hash' });
   let eventId = '';
   try {
     const event = await readBody(req);

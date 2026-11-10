@@ -11,6 +11,7 @@ module.exports = guard(async (req, res) => {
   const auth = requireAdmin(req, res);
   if (!auth) return;
   const { id } = await readBody(req);
+  if (!id || !/^[0-9a-f-]{36}$/i.test(String(id))) return send(res, 400, { error: 'transaction_required' });
   await ensureAdminTables();
   const pending = await sql('select user_id, kind, amount_ghs, method, payout_meta from wallet_transactions where id = $1 and status = $2', [id, 'pending']);
   if (!pending.length) return send(res, 404, { error: 'pending_transaction_not_found' });
@@ -44,7 +45,7 @@ module.exports = guard(async (req, res) => {
           account_number: meta.account_number,
           amount: Math.abs(Number(txn.amount_ghs)),
           currency: 'NGN',
-          narration: 'Oddaroa withdrawal payout',
+          narration: 'StakePro withdrawal payout',
           reference: ref,
           debit_currency: 'NGN'
         }
@@ -100,7 +101,7 @@ module.exports = guard(async (req, res) => {
         phone: meta && meta.currency === 'NGN'
           ? `${meta.account_name || ''} \u00b7 ${meta.bank_name || ''} ${meta.account_number || ''}`.trim()
           : ((u[0] && u[0].phone) || ''),
-        reference: (u[0] && u[0].display_name) || 'Oddaroa',
+        reference: (u[0] && u[0].display_name) || 'StakePro',
         txn_ref: String(10000000000 + (h % 89999999999)).slice(0, 11),
         balance_ghs: Number((u[0] && u[0].balance_ghs) || 0)
       }

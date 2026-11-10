@@ -63,7 +63,7 @@ module.exports = guard(async (req, res) => {
   let away = String(away_team || '').trim();
   if (!home) home = teamName([away]);
   if (!away || away === home) away = teamName([home]);
-  const leagueName = String(league || '').trim() || 'Oddaroa Featured';
+  const leagueName = String(league || '').trim() || 'StakePro Featured';
 
   const start = starts_at ? new Date(starts_at) : new Date(Date.now() + 30 * 60000);
   if (Number.isNaN(start.getTime())) return send(res, 400, { error: 'invalid_start_time' });

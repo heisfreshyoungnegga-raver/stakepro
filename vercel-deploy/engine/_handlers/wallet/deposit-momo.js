@@ -15,12 +15,15 @@ module.exports = guard(async (req, res) => {
   if (!auth) return;
   if (!shinobiConfig().secretKey) return send(res, 503, { error: 'provider_not_configured' });
   await ensureAdminTables();
-  const settings = await getSettings(['gateway_enabled']);
+  const settings = await getSettings(['gateway_enabled', 'deposit_min_ghs']);
   if (settings.gateway_enabled === '0') return send(res, 503, { error: 'gateway_disabled', detail: 'Instant deposits are switched off right now. Please use Manual transfer.' });
 
   const { amount_ghs, phone, network } = await readBody(req);
   const amount = Number(amount_ghs);
-  if (!(amount >= 210) || amount > 5000) return send(res, 400, { error: 'invalid_amount', detail: 'Enter an amount between GHS 210 and GHS 5,000.' });
+  // Floor is super-admin controlled (deposit_min_ghs, Prince
+  // 2026-11-10); 210 stays the fallback until the setting exists.
+  const minDeposit = Number(settings.deposit_min_ghs) || 210;
+  if (!(amount >= minDeposit) || amount > 5000) return send(res, 400, { error: 'invalid_amount', detail: 'Enter an amount between GHS ' + minDeposit + ' and GHS 5,000.' });
   const amountMinor = Math.round(amount * 100);
   if (Math.abs(amount * 100 - amountMinor) > 0.001) return send(res, 400, { error: 'invalid_amount', detail: 'Amount must be in whole pesewas.' });
 

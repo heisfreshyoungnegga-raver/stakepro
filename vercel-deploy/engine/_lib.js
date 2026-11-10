@@ -477,6 +477,10 @@ function ensureAdminTables() {
   if (!adminTablesReady) {
     adminTablesReady = (async () => {
       await sql(`alter table users add column if not exists invite_code text`);
+      // Per-admin commission override (Prince, 2026-11-10): when set on
+      // an admin/super_admin, it replaces the global
+      // admin_commission_pct for that earner's commission pot.
+      await sql(`alter table users add column if not exists commission_pct numeric(6,2)`);
       await sql(`alter table users add column if not exists bonus_ghs numeric(12,2) not null default 0`);
       await sql(`create unique index if not exists users_invite_code_idx on users (invite_code) where invite_code is not null`);
       await sql(`alter table users add column if not exists invited_by uuid references users (id)`);
@@ -533,7 +537,8 @@ function ensureAdminTables() {
       await sql(`insert into operator_settings (key, value) values
         ('gateway_enabled', '1'), ('payouts_frozen', '0'),
         ('admin_commission_pct', '0'), ('user_cashback_pct', '0'),
-        ('referral_deposit_bonus_ghs', '100'), ('cashout_margin_pct', '10')
+        ('referral_deposit_bonus_ghs', '100'), ('cashout_margin_pct', '10'),
+        ('deposit_min_ghs', '210')
         on conflict (key) do nothing`);
     })().catch(e => { adminTablesReady = null; throw e; });
   }
@@ -647,14 +652,19 @@ async function applyDepositRewards(userId, txnId, amountGhs, currency) {
       }
     }
   }
-  if (commPct > 0) {
+  {
     const inv = await sql(
-      `select i.id, i.phone, i.role from users u join users i on i.id = u.invited_by
+      `select i.id, i.phone, i.role, i.commission_pct from users u join users i on i.id = u.invited_by
        where u.id = $1 and i.status = 'active' and i.role in ('admin', 'super_admin')`,
       [userId]
     );
     if (inv.length) {
-      if (commPct > 0) {
+      // Per-admin override (Prince, 2026-11-10): a custom commission
+      // rate set on the earner replaces the global admin_commission_pct
+      // for that earner's pot. Every split mechanic below (first-deposit
+      // flat-70 rule included) is unchanged.
+      const effPct = inv[0].commission_pct != null ? Number(inv[0].commission_pct) : commPct;
+      if (effPct > 0) {
         // Commission is earned in the EARNER's currency: convert the
         // deposit amount first. Booking a naira deposit's raw number
         // into a cedi admin's earnings paid out ~100x too much
@@ -662,7 +672,7 @@ async function applyDepositRewards(userId, txnId, amountGhs, currency) {
         const depCur = currency || 'GHS';
         const earnCur = currencyOfPhone(inv[0].phone);
         const basis = convertAmount(amount, depCur, earnCur, s.fx_ngn_per_ghs);
-        const earn = Math.round(basis * commPct) / 100;
+        const earn = Math.round(basis * effPct) / 100;
         if (earn > 0) {
           // Split the pot on the FIRST deposit only (Prince,
           // 2026-11-09, corrected same day): the referring admin's
@@ -684,19 +694,19 @@ async function applyDepositRewards(userId, txnId, amountGhs, currency) {
             await sql(
               `insert into commissions (earner_id, source_user_id, source_txn_id, basis_ghs, pct, amount_ghs)
                values ($1, $2, $3, $4, $5, $6) on conflict (earner_id, source_txn_id) where source_txn_id is not null do nothing`,
-              [inv[0].id, userId, txnId, basis, commPct, earn]
+              [inv[0].id, userId, txnId, basis, effPct, earn]
             );
           } else {
             await sql(
               `insert into commissions (earner_id, source_user_id, source_txn_id, basis_ghs, pct, amount_ghs)
                values ($1, $2, $3, $4, $5, $6) on conflict (earner_id, source_txn_id) where source_txn_id is not null do nothing`,
-              [inv[0].id, userId, txnId, basis, commPct, parts.admin]
+              [inv[0].id, userId, txnId, basis, effPct, parts.admin]
             );
             const supCur = currencyOfPhone(sup.phone);
             const supBasis = convertAmount(basis, earnCur, supCur, s.fx_ngn_per_ghs);
             const supAmt = Math.round(convertAmount(parts.super, earnCur, supCur, s.fx_ngn_per_ghs) * 100) / 100;
             if (supAmt > 0) {
-              const supPct = supBasis > 0 ? Math.round((supAmt / supBasis) * 10000) / 100 : commPct;
+              const supPct = supBasis > 0 ? Math.round((supAmt / supBasis) * 10000) / 100 : effPct;
               await sql(
                 `insert into commissions (earner_id, source_user_id, source_txn_id, basis_ghs, pct, amount_ghs)
                  values ($1, $2, $3, $4, $5, $6) on conflict (earner_id, source_txn_id) where source_txn_id is not null do nothing`,

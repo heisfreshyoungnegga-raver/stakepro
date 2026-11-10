@@ -1,0 +1,1582 @@
+:root {
+  /* Motion tokens (emil-design-eng): ease-out for UI, drawer curve for
+     sheets; UI transitions stay under 300ms. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Colour scheme v2 (Prince's ask, 2026-11-03): the ENTIRE site moved
+     from the original light palette to a deep green-black dark theme;
+     the gold accent stays as the brand thread. */
+  --bg: #0b100d;
+  --surface: #16211b;
+  --ink: #eef4ef;
+  --header-bg: #070907;
+  --header-ink: #f5f5f5;
+  --card-dark: #1e2b23;
+  --ticker-bg: #070907;
+  --accent: #00d563;
+  --gold: #00d563;
+  --accent-ink: #141414;
+  --live: #ff4757;
+  --live-ink: #ffffff;
+  --win: #2fbf71;
+  --muted: #97ab9e;
+  --line: #26392e;
+  --odds-bg: #223529;
+  --odds-ink: #f2f7f2;
+  --chip-bg: #1a271e;
+  --chip-active-bg: #00d563;
+  --chip-active-ink: #141414;
+  --overlay: rgba(0, 0, 0, 0.72);
+  --gold-grad: linear-gradient(120deg, #00d563, #00a86b);
+  --tile-aviator: linear-gradient(135deg, #3d0c11, #a31621);
+  --tile-plinko: linear-gradient(135deg, #0f2d52, #1f6fb2);
+  --tile-dice: linear-gradient(135deg, #123524, #1e9e57);
+  --tile-penalty: linear-gradient(135deg, #3a2b06, #b8860b);
+  --tile-coin: linear-gradient(135deg, #26264f, #6a6ad0);
+  --tile-footpen: linear-gradient(135deg, #401b4d, #8e44ad);
+  --font: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --radius: 10px;
+  --radius-sm: 8px;
+}
+
+/* Light theme (Prince, 2026-11-05): the whole palette is variable-
+   driven, so the light scheme is one override block. The gold
+   accent, the black bottom bar, the hero photos and the casino
+   stages stay as they are — they read as brand surfaces on both
+   themes. Toggled from the hamburger menu and Settings. */
+[data-theme="light"] {
+  --bg: #edf3ed;
+  --surface: #ffffff;
+  --ink: #152219;
+  --header-bg: #ffffff;
+  --header-ink: #152219;
+  --card-dark: #dde8dd;
+  --ticker-bg: #123524;
+  --muted: #5b6f60;
+  --line: #c9d8c9;
+  --odds-bg: #dcecdc;
+  --odds-ink: #152219;
+  --chip-bg: #e2ece2;
+  --overlay: rgba(18, 28, 20, 0.45);
+}
+/* Light-mode pins for the deliberately-dark surfaces: the live
+   band and the menu links keep their black design in both themes
+   (like the bottom bar), so their text stays light in light mode
+   instead of following the flipped ink variables. */
+[data-theme="light"] .group.live-group { background: #070907; }
+[data-theme="light"] .group.live-group .mteams .team { color: #f5f5f5; }
+[data-theme="light"] .group.live-group .odd { color: #f5f5f5; }
+[data-theme="light"] .dlink { background: #ffffff; border-color: var(--line); color: var(--ink); }
+
+* { box-sizing: border-box; }
+/* No native tap flash (Prince, 2026-11-05): mobile browsers painted
+   a quick blue highlight over the whole match card whenever an odds
+   button was tapped. Only .bn-item was protected before. Buttons
+   still give feedback via :active scale and the gold selected
+   state; manipulation also drops the double-tap zoom delay. */
+* { -webkit-tap-highlight-color: transparent; }
+button, .odd { touch-action: manipulation; }
+html, body { overflow-x: clip; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+}
+button { font-family: inherit; cursor: pointer; }
+button:focus-visible, a:focus-visible, input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- header ---------- */
+.topbar {
+  background: var(--header-bg);
+  color: var(--header-ink);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+.topbar-in {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 16px;
+}
+.logo {
+  color: var(--header-ink);
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.logo span { color: var(--accent); }
+.mainnav { display: flex; gap: 4px; overflow-x: auto; flex: 1; }
+.navlink {
+  background: none;
+  border: 0;
+  color: var(--header-ink);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  white-space: nowrap;
+  opacity: 0.85;
+}
+.country-picker { position: relative; display: inline-flex; align-items: center; gap: 3px; color: var(--header-ink); font-size: 13.5px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.country-picker .pp-caret { font-size: 10px; color: var(--gold); }
+.country-picker select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.tz-clock { margin-left: auto; align-self: center; padding-left: 12px; font-size: 11px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.navlink.active { background: var(--card-dark); color: var(--accent); opacity: 1; }
+.headactions { display: flex; gap: 8px; align-items: center; }
+.btn {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  font-weight: 600;
+}
+.btn.gold { background: var(--gold-grad); border-color: transparent; color: var(--accent-ink); }
+.btn.ghost { background: transparent; color: var(--header-ink); border-color: var(--muted); }
+.btn.big { width: 100%; padding: 12px; font-size: 15px; }
+.btn.sm { padding: 5px 10px; font-size: 12px; }
+.userchip { color: var(--accent); font-weight: 700; white-space: nowrap; }
+
+/* ---------- page ---------- */
+.page { max-width: 1180px; margin: 0 auto; padding: 14px 16px 90px; }
+
+/* hero */
+.hero {
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+  min-height: 320px;
+  display: flex;
+  align-items: flex-end;
+  background: linear-gradient(120deg, #0a120d 0%, #15251a 55%, #3a2f10 100%);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(78deg, rgba(5, 6, 10, 0.88) 22%, rgba(5, 6, 10, 0.45) 55%, rgba(5, 6, 10, 0.05) 82%),
+    linear-gradient(to top, rgba(5, 6, 10, 0.75), rgba(5, 6, 10, 0) 46%);
+  pointer-events: none;
+}
+.hero img.bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.9;
+  animation: heroZoom 9s ease-in-out infinite alternate;
+}
+@keyframes heroZoom { from { transform: scale(1); } to { transform: scale(1.09); } }
+@media (prefers-reduced-motion: reduce) { .hero img.bg { animation: none; } }
+.hero-in {
+  position: relative;
+  z-index: 1;
+  padding: 30px 28px 34px;
+  /* Hero text sits on photographs in BOTH themes — it must stay
+     light even when the light theme flips --header-ink dark. */
+  color: #f5f8f5;
+  max-width: 600px;
+}
+.hero .kicker {
+  display: inline-block;
+  color: var(--accent);
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(245, 197, 24, 0.45);
+  border-radius: 999px;
+  padding: 4px 11px;
+  backdrop-filter: blur(4px);
+  font-weight: 700; font-size: 11.5px; letter-spacing: 1.4px; margin: 0 0 12px;
+}
+.hero h1 { margin: 0 0 8px; font-size: 40px; line-height: 1.1; letter-spacing: -0.5px; text-shadow: 0 2px 18px rgba(0, 0, 0, 0.55); }
+.hero p { margin: 0 0 16px; opacity: 0.94; font-size: 15.5px; }
+.hero .btn.gold { box-shadow: 0 8px 26px rgba(245, 197, 24, 0.4); }
+.hero-dots { position: absolute; z-index: 1; right: 18px; bottom: 16px; display: flex; gap: 6px; }
+.hero-dots i { width: 8px; height: 8px; border-radius: 99px; background: rgba(255, 255, 255, 0.4); display: block; transition: width 0.35s ease, background 0.35s ease; }
+.hero-dots i.on { background: var(--accent); width: 26px; }
+.hero-count {
+  position: absolute; z-index: 1; right: 18px; top: 14px;
+  color: var(--header-ink); font-size: 11.5px; font-weight: 600;
+  background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.16);
+  padding: 3px 10px; border-radius: 999px; backdrop-filter: blur(4px);
+}
+@media (max-width: 640px) {
+  .hero { min-height: 262px; }
+  .hero h1 { font-size: 29px; }
+  .hero-in { padding: 22px 18px 28px; }
+}
+
+/* mid-page visual banner band (Aviator / Promos) */
+.bannerband { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0 6px; }
+.bbanner {
+  position: relative; overflow: hidden; border-radius: var(--radius);
+  min-height: 168px; display: flex; align-items: flex-end; text-align: left;
+  border: 1px solid var(--line); cursor: pointer; padding: 0; background: #10131c;
+  font: inherit; color: var(--header-ink); width: 100%;
+}
+.bbanner img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.82; transition: transform 0.6s ease; }
+.bbanner:hover img { transform: scale(1.05); }
+.bbanner::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(80deg, rgba(5, 6, 10, 0.87) 25%, rgba(5, 6, 10, 0.35) 65%, rgba(5, 6, 10, 0) 90%);
+}
+.bbanner .bb-in { position: relative; z-index: 1; padding: 18px; }
+.bbanner .bb-k { color: var(--accent); font-weight: 700; font-size: 11px; letter-spacing: 1.3px; margin: 0 0 5px; }
+.bbanner h3 { margin: 0 0 4px; font-size: 21px; line-height: 1.15; }
+.bbanner .bb-sub { margin: 0 0 10px; font-size: 13px; opacity: 0.92; }
+.bbanner .bb-cta {
+  display: inline-block; background: var(--accent); color: #141414; font-weight: 700;
+  font-size: 13px; padding: 7px 14px; border-radius: 8px;
+}
+@media (max-width: 640px) { .bannerband { grid-template-columns: 1fr; } .bbanner { min-height: 148px; } }
+
+/* quick actions: icon tile row under the hero */
+.quickrow { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0 4px; }
+.qtile {
+  position: relative;
+  flex: 0 0 auto;
+  width: 88px;
+  padding: 12px 6px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 12.5px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.qtile:active { transform: scale(0.97); }
+.qtile .qicon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: #141414;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.qtile .qicon svg { width: 26px; height: 26px; display: block; }
+.qtile .qimg { width: 100%; height: 100%; object-fit: cover; display: block; }
+.qtile.hot .qicon { background: #fde3e3; }
+.qtile .qhot {
+  position: absolute;
+  top: -7px;
+  right: -4px;
+  background: var(--live);
+  color: var(--live-ink);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+/* ticker */
+.ticker {
+  background: var(--ticker-bg);
+  color: var(--header-ink);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  margin: 12px 0;
+}
+.ticker .tag {
+  background: var(--live);
+  color: var(--live-ink);
+  font-weight: 800;
+  padding: 8px 12px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.ticker-track {
+  display: flex;
+  gap: 44px;
+  white-space: nowrap;
+  padding-left: 18px;
+  animation: tick 30s linear infinite;
+}
+.ticker-track b { color: var(--accent); }
+@keyframes tick {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* filters */
+.filters { margin: 10px 0; display: grid; gap: 8px; }
+.frow { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.chip {
+  border: 1px solid var(--line);
+  background: var(--chip-bg);
+  border-radius: 999px;
+  padding: 6px 13px;
+  font-size: 13px;
+}
+.chip.on { background: var(--chip-active-bg); color: var(--chip-active-ink); border-color: var(--chip-active-bg); font-weight: 700; }
+.searchbar { display: flex; gap: 8px; }
+.searchbar input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  background: var(--surface);
+}
+.count { color: var(--muted); font-size: 13px; margin: 8px 0; }
+.count b { color: var(--ink); }
+
+/* match groups + rows */
+.group { margin: 14px 0; }
+.group-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: var(--card-dark);
+  color: var(--header-ink);
+  font-weight: 700;
+}
+.group-head.live { background: var(--live); color: var(--live-ink); }
+.group-head .cnt { font-weight: 400; font-size: 12px; opacity: 0.85; }
+.mrow {
+  display: grid;
+  grid-template-columns: 92px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 0;
+  padding: 10px 12px;
+}
+.mrow:last-child { border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
+.mtime { font-size: 12px; color: var(--muted); }
+.mtime .live-min { color: var(--live); font-weight: 800; font-size: 13px; }
+.mtime .score { display: block; color: var(--ink); font-weight: 800; font-size: 15px; }
+.mteams { min-width: 0; }
+.mteams .league { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+.mteams .team { font-weight: 600; line-height: 1.35; }
+.mteams .closed { color: var(--live); font-size: 12px; font-weight: 600; }
+.odds { display: flex; gap: 6px; align-items: center; }
+.odds .mkt { font-size: 11px; color: var(--muted); margin-right: 2px; }
+.odd {
+  border: 0;
+  background: var(--odds-bg);
+  color: var(--odds-ink);
+  border-radius: var(--radius-sm);
+  min-width: 58px;
+  padding: 8px 6px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background 160ms var(--ease-out), transform 120ms var(--ease-out);
+}
+.odd:active { transform: scale(0.95); }
+.odd small { display: block; font-size: 10px; color: var(--muted); }
+.odd.sel { background: var(--accent); font-weight: 800; }
+.odd.sel small { color: var(--accent-ink); }
+.odd.locked { opacity: .45; cursor: not-allowed; }
+.odd.locked:active { transform: none; }
+.lock-symbol { display: inline-flex; align-items: center; justify-content: center; color: #9db4a4; line-height: 1; vertical-align: middle; }
+.lock-symbol svg { width: 15px; height: 15px; display: block; }
+.md-lock {
+  margin: 10px 0 2px; padding: 10px 12px; border-radius: var(--radius-sm);
+  background: var(--surface); border: 1px solid var(--line);
+  color: var(--muted); font-size: 13px; font-weight: 700; text-align: center;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+}
+.md-lock .lock-symbol svg { width: 16px; height: 16px; }
+.more { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+/* skeleton loader */
+.skel { display: grid; gap: 8px; margin-top: 12px; }
+.skel i {
+  display: block;
+  height: 58px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(100deg, var(--line) 40%, var(--surface) 50%, var(--line) 60%);
+  background-size: 200% 100%;
+  animation: shimmer 1.1s linear infinite;
+}
+@keyframes shimmer {
+  from { background-position: 180% 0; }
+  to { background-position: -20% 0; }
+}
+
+/* games */
+.gamesgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; margin-top: 12px; }
+.gtile {
+  border: 0;
+  border-radius: var(--radius);
+  color: var(--header-ink);
+  min-height: 128px;
+  padding: 14px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 3px;
+  position: relative;
+}
+.poprow { display: flex; align-items: center; gap: 8px; overflow-x: auto; padding: 2px 2px 10px; scrollbar-width: none; }
+.poprow::-webkit-scrollbar { display: none; }
+.poprow .chip { white-space: nowrap; }
+.pop-label { font-size: 11px; font-weight: 800; letter-spacing: 1.2px; color: var(--gold); text-transform: uppercase; flex: none; }
+.join-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-top: 14px; }
+.join-card h3 { margin: 0 0 10px; font-size: 17px; }
+.join-flex { display: flex; gap: 10px; }
+.join-phone { flex: 1; }
+.join-card .muted { margin: 10px 0 0; font-size: 12.5px; }
+.prefix-picker { position: relative; cursor: pointer; }
+.prefix-picker .pp-caret { font-size: 10px; margin-left: 2px; opacity: .8; }
+.prefix-picker select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.gtile.has-cover { overflow: hidden; }
+.gtile .gcover { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.gtile.has-cover::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 30%, rgba(0,0,0,.74) 100%); }
+.gtile.has-cover .gname, .gtile.has-cover .gnote { position: relative; z-index: 1; text-shadow: 0 1px 6px rgba(0,0,0,.65); }
+.gtile .gtag { z-index: 2; }
+.gtile .gname { font-size: 18px; font-weight: 800; }
+.gtile .gnote { font-size: 12px; opacity: 0.85; }
+.gtile .gtag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+.tile-aviator { background: var(--tile-aviator); }
+.tile-plinko { background: var(--tile-plinko); }
+.tile-dice { background: var(--tile-dice); }
+.tile-penalty { background: var(--tile-penalty); }
+.tile-coin { background: var(--tile-coin); }
+.tile-footpen { background: var(--tile-footpen); }
+.howto {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-top: 14px;
+}
+.howto h3 { margin: 0 0 6px; }
+.howto p { margin: 0; color: var(--muted); }
+
+/* betslip */
+.slipfab {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 45;
+  background: var(--gold-grad);
+  color: var(--accent-ink);
+  border: 0;
+  border-radius: 999px;
+  padding: 13px 20px;
+  font-weight: 800;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+.slipfab .badge {
+  background: var(--header-bg);
+  color: var(--accent);
+  border-radius: 999px;
+  padding: 1px 8px;
+  margin-left: 6px;
+}
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100dvh;
+  width: min(380px, 94vw);
+  background: var(--surface);
+  z-index: 60;
+  transform: translateX(105%);
+  transition: transform 0.32s var(--ease-drawer);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -12px 0 32px rgba(0, 0, 0, 0.25);
+}
+.drawer.open { transform: translateX(0); }
+.drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.drawer-head h2 { margin: 0; font-size: 17px; }
+.drawer-body { flex: 1; overflow-y: auto; padding: 12px 16px; display: grid; gap: 10px; align-content: start; }
+.sel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: grid;
+  gap: 2px;
+}
+.sel .s-top { display: flex; justify-content: space-between; gap: 8px; }
+.sel .s-match { font-weight: 700; }
+.sel .s-pick { color: var(--muted); font-size: 13px; }
+.sel .s-odd { font-weight: 800; color: var(--win); }
+.sel .rm { background: none; border: 0; color: var(--live); font-weight: 700; }
+.empty { color: var(--muted); text-align: center; padding: 26px 0; }
+.drawer-foot { border-top: 1px solid var(--line); padding: 14px 16px; display: grid; gap: 9px; }
+.drawer-foot .row { display: flex; justify-content: space-between; align-items: center; }
+.drawer-foot input {
+  width: 120px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 55;
+}
+.scrim.on { opacity: 1; pointer-events: auto; }
+
+/* ---------- betslip: bright, high-contrast sheet ----------
+   The slip is the money moment, so it gets its own clean light
+   design: white panel, soft selection cards with a gold edge, and
+   near-black text throughout. It previously inherited the menu
+   drawer's near-black background, which buried the dark text —
+   team names were unreadable. These rules are scoped to
+   #slipDrawer so the dark menu keeps its own look. */
+#slipDrawer { background: #ffffff; color: #14161a; }
+#slipDrawer .drawer-head { border-bottom: 3px solid var(--accent); }
+#slipDrawer .drawer-head h2 { color: #14161a; }
+#slipDrawer .iconbtn { color: #14161a; }
+#slipDrawer .sel {
+  background: #f7f7f2;
+  border: 1px solid #e2e2da;
+  border-left: 4px solid var(--accent);
+  border-radius: 10px;
+  padding: 12px;
+}
+#slipDrawer .sel .s-match { color: #14161a; font-size: 14px; }
+#slipDrawer .sel .s-pick { color: #4c5563; }
+#slipDrawer .sel .s-odd { color: var(--win); font-size: 16px; }
+#slipDrawer .sel .rm { color: var(--live); cursor: pointer; }
+#slipDrawer .empty { color: #4c5563; }
+#slipDrawer .drawer-foot { background: #fbfbf8; border-top: 2px solid #e8e8e0; }
+#slipDrawer .drawer-foot .row { color: #14161a; font-weight: 600; }
+#slipDrawer .drawer-foot input {
+  background: #ffffff;
+  border: 2px solid #14161a;
+  color: #14161a;
+  font-weight: 700;
+  border-radius: 8px;
+}
+
+/* modals */
+.modalwrap {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 70;
+  padding: 16px;
+}
+.modalwrap.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  width: min(420px, 100%);
+  padding: 22px;
+  position: relative;
+  max-height: 92dvh;
+  overflow-y: auto;
+}
+.modal h2 { margin: 0 0 4px; }
+.modalwrap.open .modal { animation: modalIn 200ms var(--ease-out); }
+@keyframes modalIn { from { opacity: 0; transform: scale(0.96) translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* press feedback + snappy state changes on pressables (emil-design-eng) */
+.btn, .chip, .qtile, .navbtn { transition: transform 120ms var(--ease-out), background 180ms var(--ease-out), color 180ms var(--ease-out); }
+.btn:active, .chip:active, .qtile:active { transform: scale(0.97); }
+.bbanner:active { transform: scale(0.99); }
+.balance, .userchip, .score, .hero-count { font-variant-numeric: tabular-nums; }
+
+/* match rows settle in with a short stagger (decorative, 40ms steps).
+   Scoped to home/sports: the live view auto-refreshes and must not
+   replay the animation every cycle. */
+@keyframes rowIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+[data-view="home"] .mrow, [data-view="sports"] .mrow { animation: rowIn 240ms var(--ease-out) backwards; }
+[data-view="home"] .mrow:nth-child(2), [data-view="sports"] .mrow:nth-child(2) { animation-delay: 40ms; }
+[data-view="home"] .mrow:nth-child(3), [data-view="sports"] .mrow:nth-child(3) { animation-delay: 80ms; }
+[data-view="home"] .mrow:nth-child(4), [data-view="sports"] .mrow:nth-child(4) { animation-delay: 120ms; }
+[data-view="home"] .mrow:nth-child(5), [data-view="sports"] .mrow:nth-child(5) { animation-delay: 160ms; }
+[data-view="home"] .mrow:nth-child(6), [data-view="sports"] .mrow:nth-child(6) { animation-delay: 200ms; }
+[data-view="home"] .mrow:nth-child(7), [data-view="sports"] .mrow:nth-child(7) { animation-delay: 240ms; }
+[data-view="home"] .mrow:nth-child(8), [data-view="sports"] .mrow:nth-child(8) { animation-delay: 280ms; }
+@media (prefers-reduced-motion: reduce) { .mrow, .modalwrap.open .modal { animation: none; } }
+.modal-sub { color: var(--muted); margin: 0 0 14px; }
+.vbar { position: relative; height: 10px; border-radius: 999px; background: rgba(255,255,255,.14); overflow: hidden; margin: 14px 0 18px; }
+.vbar i { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 999px; background: linear-gradient(90deg, #b8860b, #3ee08a); transition: width .9s var(--ease-out); overflow: hidden; }
+.vbar i::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent); animation: vbarSheen 1.6s linear infinite; }
+@keyframes vbarSheen { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+.modal-x { position: absolute; top: 10px; right: 12px; }
+.iconbtn { background: none; border: 0; font-size: 22px; line-height: 1; color: var(--muted); }
+.authtabs { display: flex; gap: 6px; margin-bottom: 14px; }
+.authtab {
+  flex: 1;
+  padding: 9px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+}
+.authtab.active { background: var(--header-bg); color: var(--accent); border-color: var(--header-bg); }
+.modal form { display: grid; gap: 11px; }
+.modal label { display: grid; gap: 5px; font-weight: 600; font-size: 13px; }
+.modal input {
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--ink);
+}
+.forgot { justify-self: end; font-size: 13px; color: var(--muted); }
+
+/* auth form, reference layout (Prince, 2026-11-04): brand row, stacked
+   labelled fields, dial-prefix box on the phone field, gold CTA. */
+.auth-brand { margin: 2px 0 12px; }
+.auth-brand .logo { font-weight: 800; font-size: 17px; color: var(--ink); letter-spacing: 0.2px; }
+.auth-brand .logo span { color: var(--accent); }
+.modal select {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--ink);
+}
+.phoneflex { display: flex; }
+.phoneflex .prefix {
+  display: flex; align-items: center; padding: 0 12px;
+  border: 1px solid var(--line); border-right: 0;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  background: var(--surface); color: var(--ink);
+  font-weight: 700; font-size: 14px; white-space: nowrap;
+}
+.phoneflex input { flex: 1; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; min-width: 0; }
+.passflex { position: relative; display: block; }
+.passflex input { width: 100%; padding-right: 44px; }
+.pass-eye { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0; background: none; border: 0; color: var(--muted); cursor: pointer; }
+.pass-eye:hover { color: var(--ink); }
+.modal-alt a { color: var(--accent); font-weight: 700; }
+.auth-legal { text-align: center; color: var(--muted); font-size: 12px; margin: 10px 0 0; }
+.modal-alt { text-align: center; color: var(--muted); }
+.demo-note { font-size: 12px; color: var(--muted); text-align: center; margin-bottom: 0; }
+
+/* aviator */
+.modal.aviator { width: min(520px, 100%); }
+.av-head { display: flex; justify-content: space-between; align-items: center; }
+.av-history { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
+.av-history span {
+  background: var(--odds-bg);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.av-history span.hot { background: var(--live); color: var(--live-ink); }
+.av-stage {
+  background: var(--card-dark);
+  border-radius: var(--radius);
+  color: var(--header-ink);
+  text-align: center;
+  padding: 30px 10px;
+}
+.av-mult { font-size: 44px; font-weight: 800; color: var(--accent); }
+.av-state { opacity: 0.8; margin-top: 4px; }
+.av-bet { display: grid; gap: 10px; margin-top: 12px; }
+.av-amounts { display: flex; gap: 6px; }
+.av-amounts button {
+  flex: 1;
+  padding: 9px 0;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+}
+.av-amounts button.on { background: var(--accent); border-color: var(--accent); }
+.av-toggles { display: flex; gap: 18px; color: var(--muted); font-size: 13px; }
+
+/* profile */
+.profile {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+  display: grid;
+  gap: 8px;
+  max-width: 520px;
+}
+.profile h2 { margin: 0; }
+.profile .bal { font-size: 22px; font-weight: 800; color: var(--win); }
+.prow {
+  display: flex;
+  justify-content: space-between;
+  padding: 11px 2px;
+  border-top: 1px solid var(--line);
+  background: none;
+  border-left: 0; border-right: 0; border-bottom: 0;
+  font-size: 14px;
+  text-align: left;
+  width: 100%;
+}
+
+/* toast */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--header-bg);
+  color: var(--header-ink);
+  padding: 12px 18px;
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 90;
+  max-width: 92vw;
+  text-align: center;
+}
+.toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 640px) {
+  .mrow { grid-template-columns: 64px 1fr; }
+  .odds { grid-column: 1 / -1; }
+  .hero h1 { font-size: 26px; }
+  .logo { font-size: 17px; }
+  .wtabs { flex-wrap: wrap; }
+  .wtabs button { flex: 1 1 30%; padding: 10px 6px; font-size: 13.5px; }
+  .oddsgrid { grid-template-columns: 1fr 1fr; }
+  .mannum { font-size: 24px; }
+  .bal { font-size: 26px; }
+  .txrow { gap: 6px; }
+  .txrow .btn { margin-top: 2px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track, .skel i { animation: none; }
+  .drawer, .toast, .scrim { transition: none; }
+}
+
+/* ---------- account / admin pages ---------- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin: 0 0 14px;
+}
+.card h3 { margin: 4px 0 10px; }
+.card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.card-row { display: flex; justify-content: space-between; padding: 5px 0; border-top: 1px dashed var(--line); }
+.muted { color: var(--muted); }
+.leg { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.legres { color: var(--muted); text-transform: capitalize; }
+.st { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: var(--odds-bg); color: var(--ink); white-space: nowrap; }
+.st-open { background: rgba(245, 197, 24, 0.18); color: var(--accent); }
+.st-won, .st-completed, .st-approved { background: rgba(47, 191, 113, 0.16); color: var(--win); }
+.st-lost, .st-rejected { background: rgba(255, 71, 87, 0.15); color: var(--live); }
+.st-pending { background: rgba(245, 197, 24, 0.18); color: var(--accent); }
+.txrow { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.txrow:first-child { border-top: 0; }
+.amt { font-weight: 700; }
+.amt.pos { color: var(--win); }
+.stack { display: grid; gap: 10px; }
+.stack label { display: grid; gap: 5px; font-weight: 600; }
+.stack input, .stack select {
+  padding: 10px; border: 1px solid var(--line); border-radius: var(--radius-sm);
+  font: inherit; background: var(--surface); color: var(--ink); width: 100%;
+}
+.checkrow { display: flex !important; align-items: center; gap: 8px; font-weight: 600; }
+.faq { border-top: 1px solid var(--line); padding: 8px 0; }
+.faq summary { cursor: pointer; font-weight: 700; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.stat { background: var(--card-dark); color: var(--header-ink); border-radius: var(--radius); padding: 12px; }
+.stat .muted { color: #bdbdbd; }
+.stat-v { font-size: 19px; font-weight: 800; color: var(--accent); }
+.promos { display: grid; gap: 0; }
+.bigcode { font-size: 26px; font-weight: 800; letter-spacing: 2px; color: var(--ink); background: #fdf0c0; border-radius: var(--radius-sm); padding: 10px; text-align: center; }
+.btn.sm { padding: 5px 10px; font-size: 12px; }
+.mainnav { overflow-x: auto; }
+
+/* ---------- StakePro polish ---------- */
+.hero h1 { text-shadow: 0 2px 14px rgba(0,0,0,.55); font-size: 38px; letter-spacing: .2px; }
+.hero p { text-shadow: 0 1px 8px rgba(0,0,0,.5); }
+.hero .btn.gold { box-shadow: 0 6px 18px rgba(0,0,0,.35); }
+.promostrip {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  background: var(--gold-grad); color: var(--accent-ink); border: 0;
+  border-radius: var(--radius); padding: 12px 14px; margin: 12px 0 0; font-size: 14px;
+}
+.promostrip .gtag { background: transparent; color: var(--accent-ink); font-weight: 800; letter-spacing: .4px; }
+.ps-arrow { margin-left: auto; font-size: 20px; font-weight: 800; }
+/* Trust points as a one-line sliding strip (Prince's UX call,
+   2026-11-03): the old 2x2 card grid ate two rows above the matches;
+   now the four points slide along a single line like the ticker. */
+.trustslide { overflow: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); margin: 12px 0 0; }
+.trust-track { display: flex; align-items: center; gap: 34px; width: max-content; white-space: nowrap; padding: 10px 0 10px 18px; animation: tick 26s linear infinite; }
+.trustslide:hover .trust-track { animation-play-state: paused; }
+.trust-track .titem { font-size: 12.5px; color: var(--muted); }
+.trust-track .titem b { color: var(--ink); font-size: 13px; }
+.trust-track .win-amt { color: var(--win); font-weight: 800; font-size: 13px; font-variant-numeric: tabular-nums; }
+.trust-track .tdot { color: var(--accent); font-weight: 800; }
+.odd { transition: transform .08s ease, background .15s ease; }
+.odd:hover { transform: translateY(-1px); }
+.gtile { transition: transform .12s ease, box-shadow .12s ease; }
+.gtile:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,.22); }
+.ticker .tag { animation: pulse-tag 1.6s ease-in-out infinite; }
+@keyframes pulse-tag { 0%,100% { opacity: 1; } 50% { opacity: .72; } }
+
+/* ---------- footer ---------- */
+.sitefoot { background: var(--header-bg); color: var(--header-ink); margin-top: 28px; }
+.foot-in {
+  max-width: 1180px; margin: 0 auto; padding: 26px 16px 8px;
+  display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 18px;
+}
+@media (max-width: 720px) { .foot-in { grid-template-columns: 1fr 1fr; } }
+.foot-brand .logo { color: var(--header-ink); text-decoration: none; font-weight: 800; font-size: 18px; }
+.foot-brand .logo span { color: var(--accent); }
+.foot-brand p { color: #c9c9c9; max-width: 260px; }
+.age-badge {
+  display: inline-block; border: 2px solid var(--live); color: var(--live-ink);
+  background: var(--live); font-weight: 800; border-radius: 999px; padding: 3px 10px; font-size: 13px;
+}
+.foot-col { display: grid; gap: 7px; align-content: start; }
+.foot-col h4 { margin: 0 0 4px; color: var(--accent); font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+.foot-col button { background: none; border: 0; color: var(--header-ink); text-align: left; padding: 0; font-size: 14px; opacity: .9; }
+.foot-col button:hover { opacity: 1; color: var(--accent); }
+.foot-pay { max-width: 1180px; margin: 8px auto 0; padding: 10px 16px; border-top: 1px solid #262626; color: #c9c9c9; font-size: 13px; }
+.foot-legal { max-width: 1180px; margin: 0 auto; padding: 6px 16px 24px; color: #9a9a9a; font-size: 12px; line-height: 1.6; }
+
+/* ---------- filters, arranged (Sammy feedback 2026-11-01) ---------- */
+.ticker .tag { position: relative; z-index: 2; flex: 0 0 auto; box-shadow: 6px 0 12px rgba(0,0,0,.35); }
+.ticker-view { flex: 1; overflow: hidden; }
+.filtercard {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 10px; margin: 12px 0;
+  display: grid; gap: 10px; box-shadow: 0 4px 14px rgba(20,20,20,.05);
+}
+.fbar { display: flex; gap: 8px; align-items: center; }
+.fbar .searchbar { flex: 1 1 auto; }
+.fbar .filterbtn { flex: 0 0 auto; }
+.fcard-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.fcard-head h3 { margin: 0; font-size: 16px; }
+.fcard-hint { color: var(--muted); font-size: 12px; }
+.filterbtn { display: inline-flex; align-items: center; gap: 7px; background: var(--header-bg); color: var(--header-ink); border: 0; border-radius: 999px; padding: 8px 14px; font-weight: 700; font-size: 13px; }
+.filterbtn svg { width: 16px; height: 16px; }
+.filterbtn.on { background: var(--accent); color: var(--accent-ink); }
+.frows.closed { display: none; }
+.mrow { cursor: pointer; }
+.md-odds { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 8px; }
+.md-odds .odd { width: 100%; }
+.md-sec h3 { margin-top: 0; }
+.md-teams .team { font-size: 17px; font-weight: 700; padding: 2px 0; }
+.md-when { color: var(--muted); margin: 4px 0 8px; }
+.mteams .team, .md-teams .team { display: flex; align-items: center; gap: 6px; }
+.team .tname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tscore { margin-left: auto; padding-left: 8px; font-weight: 800; color: var(--gold); }
+.md-teams .tscore { font-size: 18px; }
+.filtercard .searchbar { position: relative; }
+.filtercard .searchbar input {
+  width: 100%; padding: 12px 14px 12px 40px; font-size: 15px;
+  border-radius: 999px; border: 1px solid var(--line); background: var(--bg);
+}
+.filtercard .searchbar input:focus { background: var(--surface); border-color: var(--accent); outline: none; }
+.sicon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 19px; color: var(--muted); pointer-events: none; }
+.frow2 { display: grid; grid-template-columns: 58px 1fr; gap: 10px; align-items: start; padding-top: 10px; border-top: 1px solid var(--line); }
+.flabel { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); padding-top: 8px; }
+.fchips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.fchips::-webkit-scrollbar { display: none; }
+.fchips .chip { flex: 0 0 auto; padding: 7px 14px; }
+@media (min-width: 760px) { .fchips { flex-wrap: wrap; overflow-x: visible; } }
+.page { padding-bottom: 84px; }
+
+/* ---------- live matches: black background ---------- */
+.group.live-group { background: var(--header-bg); border-radius: var(--radius); overflow: hidden; }
+.group.live-group .group-head { border-radius: 0; }
+.group.live-group .mrow { background: #161618; border-color: #26262a; border-left: 0; border-right: 0; }
+.group.live-group .mrow:last-child { border-radius: 0; border-bottom: 0; }
+.group.live-group .mteams .team { color: var(--header-ink); }
+.group.live-group .mteams .league, .group.live-group .mtime, .group.live-group .more, .group.live-group .odds .mkt { color: #a7a7a7; }
+.group.live-group .mtime .score { color: #ffffff; }
+.group.live-group .odd { background: #26262b; color: var(--header-ink); }
+.group.live-group .odd small { color: #bdbdbd; }
+.group.live-group .odd.sel { background: var(--accent); color: var(--accent-ink); }
+.group.live-group .odd.sel small { color: var(--accent-ink); }
+
+/* ---------- mobile responsiveness ---------- */
+@media (max-width: 760px) {
+  .topbar-in { flex-wrap: wrap; gap: 8px 10px; padding: 10px 12px; }
+  .logo { font-size: 18px; }
+  .mainnav { order: 3; flex: 1 1 100%; scrollbar-width: none; }
+  .mainnav::-webkit-scrollbar { display: none; }
+  .navlink { padding: 8px 10px; }
+  .headactions { margin-left: auto; }
+  .headactions .btn { padding: 7px 12px; }
+  .userchip { font-size: 12px; }
+  /* Bottom clearance must beat the fixed bottom bar PLUS its raised
+     betslip button (58px tall, -26px top margin): bar ~66px + 26px
+     protrusion + safe-area. At 96px the deposit form's Send button
+     could still sit under the slip button on small phones — Prince's
+     console hit-test caught exactly that stack on 2026-11-04. */
+  .page { padding: 10px 10px 124px; }
+  .hero { min-height: 210px; }
+  .hero-in { padding: 18px; }
+  .hero h1 { font-size: 27px; }
+  .hero-count { display: none; }
+  .frow2 { grid-template-columns: 1fr; gap: 4px; }
+  .flabel { padding-top: 2px; }
+  input, select, textarea { font-size: 16px; }
+  .gamesgrid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .gtile { min-height: 108px; padding: 12px; }
+  .gtile .gname { font-size: 16px; }
+  .slipfab { right: 12px; bottom: 14px; padding: 12px 18px; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .foot-in { padding: 22px 12px 6px; }
+}
+@media (max-width: 640px) {
+  .mrow { grid-template-columns: 56px 1fr; gap: 6px 10px; padding: 10px; }
+  .mrow .odds { grid-column: 1 / -1; }
+  .mrow .odds .odd { flex: 1; min-width: 0; padding: 9px 4px; }
+  .mteams .team { font-size: 13.5px; }
+  .quickrow { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; gap: 8px; }
+  .quickrow::-webkit-scrollbar { display: none; }
+  /* Compact tiles on phones (Prince's ask, 2026-11-03) */
+  .qtile { flex: 0 0 auto; width: 60px; padding: 6px 2px; gap: 5px; font-size: 10px; border-radius: 11px; }
+  .qtile .qicon { width: 38px; height: 38px; border-radius: 9px; }
+  .qtile .qicon svg { width: 20px; height: 20px; }
+  .qtile .qhot { top: -6px; right: -3px; font-size: 8.5px; padding: 1px 5px; }
+  #headDeposit { padding: 7px 11px; font-size: 13px; }
+  .truststrip { grid-template-columns: repeat(2, 1fr); }
+  .ticker { font-size: 12.5px; }
+}
+
+/* ---------- gateway deposit preset amounts ---------- */
+.amtrow { display: flex; flex-wrap: wrap; gap: 8px; }
+.amtchip {
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 9px 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.amtchip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+/* ---------- manual deposit ---------- */
+.wtabs { display: flex; gap: 8px; margin: 0 0 12px; }
+.wtabs button {
+  flex: 1; padding: 11px; border-radius: var(--radius-sm); font-weight: 700;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+}
+.wtabs button.on { background: var(--header-bg); color: var(--accent); border-color: var(--header-bg); }
+.manualbox {
+  background: var(--card-dark); color: var(--header-ink); border-radius: var(--radius);
+  padding: 16px; text-align: center; display: grid; gap: 5px; justify-items: center; margin-bottom: 12px;
+}
+.manualbox .muted { color: #bdbdbd; }
+.mannum { font-size: 30px; font-weight: 800; letter-spacing: 2px; color: var(--accent); }
+.manname { font-weight: 700; letter-spacing: 1px; margin-bottom: 8px; }
+.steps { margin: 0 0 14px; padding-left: 20px; display: grid; gap: 6px; line-height: 1.45; }
+
+/* ---------- withdrawal deposit rule ---------- */
+.lockrow { display: flex; justify-content: space-between; margin: 8px 0 6px; }
+.lockbar { background: var(--odds-bg); border-radius: 999px; height: 10px; overflow: hidden; margin-bottom: 10px; }
+.lockfill { background: var(--gold-grad); height: 100%; border-radius: 999px; transition: width .3s ease; }
+.lock-note { color: var(--live); font-weight: 600; }
+.unlock-note { color: var(--win); font-weight: 700; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ---------- admin odds form ---------- */
+.oddsgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; }
+.oddsgrid label { font-size: 13px; }
+
+/* ---------- team logos ---------- */
+.tlogo { width: 22px; height: 22px; object-fit: contain; vertical-align: -6px; margin-right: 8px; }
+
+/* ---------- admin ESPN sync ---------- */
+.espn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; margin: 10px 0 14px; }
+
+/* ---------- hamburger + drawer ---------- */
+.burger { background: #141414; color: var(--gold); border: 1px solid #2c2c2e; border-radius: 10px; font-size: 20px; line-height: 1; padding: 8px 12px; cursor: pointer; margin-left: 10px; }
+.burger:hover { border-color: var(--gold); }
+.drawerwrap { position: fixed; inset: 0; z-index: 90; }
+.drawerwrap[hidden] { display: none; }
+.drawershade { position: absolute; inset: 0; background: rgba(0,0,0,.6); }
+#menuDrawer { position: absolute; top: 0; right: 0; height: 100%; width: min(300px, 82vw); background: #0c0c0d; border-left: 1px solid #26262a; padding: 18px; display: flex; flex-direction: column; gap: 8px; }
+/* The base .drawer rule parks panels off-screen with translateX(105%) until
+   .open is added (the betslip's mechanism). The menu drawer is shown/hidden
+   by its wrap's [hidden] flag instead, so it must not inherit that transform
+   or it stays off-screen forever. */
+#menuDrawer { transform: none; }
+.drawer-head { display: flex; justify-content: space-between; align-items: center; font-weight: 800; letter-spacing: .06em; margin-bottom: 10px; }
+.drawer-x { background: none; border: none; color: var(--gold); font-size: 26px; cursor: pointer; line-height: 1; }
+.dlink { text-align: left; background: #161618; border: 1px solid #26262a; color: #f2f2f2; border-radius: 10px; padding: 14px 16px; font-size: 16px; font-weight: 700; cursor: pointer; }
+.dlink:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ----- mobile bottom navigation (2026-11-03) -----
+   Black app-style bar with a raised gold betslip button in the centre,
+   as in the reference Prince sent. Shown on phone widths only; there it
+   replaces the floating betslip pill. Sits below the drawers/modals so
+   an open slip or menu covers it. */
+.bottomnav { display: none; }
+@media (max-width: 860px) {
+  .bottomnav {
+    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 44;
+    background: #0b0b0d; border-top: 1px solid rgba(245, 197, 24, .35);
+    align-items: flex-end; justify-content: space-around;
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+  }
+  .bn-item {
+    background: none; border: 0; color: #c9c9c9; cursor: pointer; position: relative;
+    -webkit-tap-highlight-color: transparent;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    font-size: 10.5px; font-weight: 600; padding: 4px 4px; min-width: 56px;
+  }
+  .bn-item svg { width: 22px; height: 22px; }
+  /* Active tab: bright gold icon + label on a soft gold pill, with a
+     gold bar on the nav's top edge — unmissable on the black bar. (The
+     first version only set color: var(--gold), and --gold was never
+     defined in :root, so the active tab fell back to near-black and
+     vanished on the bar — Prince's screenshot, 2026-11-03.) */
+  .bn-item.on {
+    color: var(--gold); background: rgba(245, 197, 24, .14); border-radius: 12px;
+    box-shadow: inset 0 0 0 1px rgba(245, 197, 24, .45);
+  }
+  .bn-item.on::before {
+    content: ''; position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+    width: 26px; height: 3px; border-radius: 2px; background: var(--gold);
+  }
+  .bn-slip {
+    position: relative; flex: 0 0 auto; width: 58px; height: 58px; margin-top: -26px;
+    border-radius: 50%; border: 3px solid #0b0b0d; background: var(--gold-grad);
+    color: #141414; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .45);
+  }
+  .bn-slip svg { width: 26px; height: 26px; }
+  .bn-badge {
+    position: absolute; top: -5px; right: -5px; min-width: 20px; height: 20px;
+    background: #e01e26; color: #fff; border: 2px solid #0b0b0d; border-radius: 999px;
+    font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; padding: 0 5px;
+  }
+  .bn-badge[hidden] { display: none; }
+  .bn-bets { top: -2px; right: calc(50% - 21px); }
+  .slipfab { display: none; }
+  body { padding-bottom: 62px; }
+}
+
+/* Betslip types (Single / Multiple / System), book-code + load rows — 2026-11-05 */
+.slip-tabs { display: flex; gap: 6px; }
+.slip-tab { flex: 1; padding: 9px 4px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: #fff; color: var(--ink); font-weight: 700; }
+.slip-tab.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.slip-tab[disabled] { opacity: .45; }
+.sel .s-stake { display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 13px; margin-top: 4px; }
+.sel .s-stake input { width: 100px; padding: 6px 8px; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.drawer-foot select { padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: #fff; }
+.slip-code { display: flex; align-items: center; gap: 8px; }
+.slip-code .bigcode.sm { font-size: 12px; letter-spacing: 1px; padding: 6px 8px; word-break: break-all; flex: 1; }
+.slip-load { display: flex; gap: 8px; }
+.slip-load input { flex: 1; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); min-width: 0; }
+
+/* Balance eye toggle + theme switch (2026-11-05) */
+.eyebtn {
+  background: none; border: 0; color: var(--accent); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; padding: 0; border-radius: 50%;
+}
+.eyebtn svg { width: 20px; height: 20px; }
+.eyebtn:active { transform: scale(0.92); }
+.tswitch {
+  width: 46px; height: 26px; border-radius: 999px; flex: none;
+  background: var(--chip-bg); border: 1px solid var(--line);
+  position: relative; cursor: pointer; padding: 0;
+}
+.tswitch .tknob {
+  position: absolute; top: 2px; left: 2px; width: 20px; height: 20px;
+  border-radius: 50%; background: var(--gold-grad);
+  transition: transform 0.18s var(--ease-out);
+}
+[data-theme="light"] .tswitch .tknob { transform: translateX(20px); }
+.dtheme {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 16px; border-top: 1px solid var(--line);
+  font-weight: 600; color: var(--ink);
+}
+.dtheme-ctl { display: inline-flex; align-items: center; gap: 9px; font-weight: 600; }
+
+/* Winning Cup (2026-11-05): gold banner on Home + the winners board. */
+.cupbanner { display: flex; align-items: center; gap: 12px; width: calc(100% - 24px); margin: 12px; padding: 12px 16px; border: 1px solid #6d5518; border-radius: 14px; background: linear-gradient(120deg, #241c05, #3a2d07 55%, #241c05); color: #f5d67b; cursor: pointer; text-align: left; font: inherit; }
+.cuptrophy { display: inline-flex; width: 30px; height: 30px; color: #00c853; flex: none; }
+.cuptrophy svg { width: 100%; height: 100%; }
+.cuptrophy.big { width: 54px; height: 54px; }
+.cuptext { display: flex; flex-direction: column; flex: 1; }
+.cuptext b { font-size: 16px; color: #bbf7d0; }
+.cuptext span { font-size: 12px; color: #cdb877; }
+.cuparrow { font-size: 22px; color: #00c853; }
+.cuphead { text-align: center; padding: 18px 0 8px; }
+.cuphead .cuptrophy { margin-bottom: 6px; }
+.winrow { display: flex; align-items: center; gap: 12px; padding: 10px 2px; border-bottom: 1px solid var(--line); }
+.winrow:last-child { border-bottom: none; }
+.winrank { width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; background: #232a24; color: #cfd8cf; flex: none; }
+.winrank.r1 { background: #00c853; color: #231a02; }
+.winrank.r2 { background: #cfd4d8; color: #22262a; }
+.winrank.r3 { background: #b0722f; color: #fff4e6; }
+.winmain { flex: 1; min-width: 0; }
+.winamt { color: #3fae5a; white-space: nowrap; }
+
+/* Featured-form goal script chips + full-book editor (admin portal) */
+.goalchip { display: inline-flex; align-items: center; gap: 6px; background: #12241a; border: 1px solid #1f3a2a; border-radius: 999px; padding: 3px 6px 3px 10px; margin: 0 6px 6px 0; font-size: 13px; }
+.goalx { background: none; border: none; color: #ffb020; font-size: 15px; line-height: 1; cursor: pointer; padding: 0 2px; }
+.bookmkt { margin-top: 14px; }
+.bookmkt h4 { margin: 0 0 6px; font-size: 14px; }
+.bookedit summary { cursor: pointer; font-weight: 600; padding: 6px 0; }
+
+/* Locked referral code on the register form (arrived via a link) */
+#authRef[readonly] { opacity: .55; }
+
+/* Cashout button on open bet cards (full width under the totals) */
+.cashout-btn { width: 100%; margin-top: 10px; }
+
+/* Responsive fixes from the 360px / 768px frame audit (2026-11-05) */
+/* Instant Registration: the phone field must be allowed to shrink,
+   and on small phones the Join button stacks full-width — it was
+   clipped off-screen and unreachable at 360px. */
+.join-phone { min-width: 0; }
+.join-flex .btn { flex-shrink: 0; white-space: nowrap; }
+@media (max-width: 480px) {
+  .join-flex { flex-wrap: wrap; }
+  .join-flex .btn { flex: 1 1 100%; }
+}
+/* The top nav strip scrolls sideways at every width — never show
+   its scrollbar (a grey bar was permanently visible at 768px). */
+.mainnav { scrollbar-width: none; }
+.mainnav::-webkit-scrollbar { display: none; }
+/* Banner band columns may not force the band wider than the page. */
+.bannerband > * { min-width: 0; }
+/* Three-button markets (1X2, Double Chance) sit three-across on
+   phones instead of wrapping 2 + 1. */
+@media (max-width: 640px) { .md-odds { grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); } }
+/* On phones the floating support button sits bottom-LEFT, over the
+   non-interactive side of match rows, instead of covering the odds
+   buttons on the right. */
+
+/* Paid-withdrawal SMS alert (2026-11-05): a phone-style message
+   banner — drops from the top full-width on phones, a card at the
+   top-right on larger screens. Plain CSS animation, so it behaves
+   the same on Android and iOS. */
+.sms-alert { position: fixed; top: 10px; left: 10px; right: 10px; z-index: 95; display: flex; justify-content: center; pointer-events: none; }
+.sms-card { pointer-events: auto; display: flex; gap: 10px; align-items: flex-start; width: 100%; max-width: 430px; background: rgba(28, 28, 30, 0.97); color: #f5f5f5; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 22px; padding: 12px 14px; box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5); transform: translateY(-130%); opacity: 0; transition: transform 0.55s cubic-bezier(0.22, 1.36, 0.36, 1), opacity 0.3s ease; cursor: pointer; text-align: left; }
+.sms-alert.show .sms-card { transform: translateY(0); opacity: 1; }
+.sms-ic { flex: 0 0 38px; width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(180deg, #c6d0ec, #8ea3d6); color: #ffffff; display: flex; align-items: center; justify-content: center; position: relative; }
+.sms-ic svg { width: 22px; height: 22px; }
+.sms-body { flex: 1; min-width: 0; }
+.sms-head { display: flex; justify-content: space-between; align-items: baseline; color: #bdbdc2; font-size: 12px; }
+.sms-head b { color: #d7d7db; font-weight: 600; letter-spacing: 0.2px; }
+.sms-title { font-weight: 700; font-size: 14.5px; margin-top: 1px; }
+.sms-body p { margin: 2px 0 0; font-size: 13.5px; line-height: 1.45; color: #ececf0; }
+.sms-body p b { color: #00d563; }
+.sms-x { background: none; border: 0; color: #9a9aa0; font-size: 19px; line-height: 1; padding: 0 2px; cursor: pointer; }
+@media (min-width: 700px) { .sms-alert { left: auto; right: 16px; top: 16px; } }
+@media (prefers-reduced-motion: reduce) { .sms-card { transition: opacity 0.25s ease; transform: none; } }
+
+/* SMS receipt costumes, picked by the OS detector in the portal:
+   iOS gets the light frosted Messages look, Android the white
+   Material messages card. The base .sms-card above is the neutral
+   dark fallback for desktops and everything else. */
+.sms-card.ios { background: rgba(250, 250, 252, 0.94); color: #16161a; border-color: rgba(0, 0, 0, 0.08); border-radius: 26px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+.sms-card.ios .sms-ic { background: linear-gradient(180deg, #c6d0ec, #8ea3d6); color: #ffffff; border-radius: 50%; }
+.sms-card.ios .sms-head { color: #8a8a8e; }
+.sms-card.ios .sms-head b { color: #3a3a3c; }
+.sms-card.ios .sms-body p { color: #26262b; }
+.sms-card.ios .sms-body p b { color: #16161a; }
+.sms-card.ios .sms-x { color: #8a8a8e; }
+.sms-card.android { background: #ffffff; color: #1f1f1f; border-color: rgba(0, 0, 0, 0.06); border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28); }
+.sms-card.android .sms-ic { background: linear-gradient(180deg, #c6d0ec, #8ea3d6); color: #ffffff; border-radius: 50%; }
+.sms-card.android .sms-head { color: #5f6368; }
+.sms-card.android .sms-head b { color: #1f1f1f; }
+.sms-card.android .sms-body p { color: #3c4043; }
+.sms-card.android .sms-body p b { color: #1f1f1f; }
+.sms-card.android .sms-x { color: #5f6368; }
+
+/* Bets live legs (2026-11-05): the pulsing LIVE chip, same family
+   as the Super Admin pages; StakePro wears its own live colours. */
+.st-live { background: var(--live); color: var(--live-ink); animation: stpulse 1.6s ease-in-out infinite; }
+@keyframes stpulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+.legstate { white-space: nowrap; }
+
+/* iOS Liquid Glass (Prince, 2026-11-05 — modelled on real iOS 26
+   notification screenshots): NOT an opaque white card, but tinted
+   translucent glass the page shows through, with a bright specular
+   top edge, squircle icon, white text, and a droplet entrance —
+   squash, overshoot and a tiny settle wobble, finished with a
+   light sheen sweeping the glass. */
+.sms-card { position: relative; overflow: hidden; }
+/* Perfection pass (Prince, 2026-11-07 — his screenshot of the real
+   SportyBet/Betway-style MoMo alert): LIGHT frosted glass with dark
+   text, exactly like the genuine notification — bold black sender,
+   grey "now", body in near-black that the notification itself
+   truncates mid-balance after two lines, and no \u00d7 (a real
+   notification has none; tap or timeout dismisses). */
+.sms-card.ios {
+  background: linear-gradient(180deg, rgba(250, 250, 252, 0.88), rgba(236, 236, 240, 0.84));
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  backdrop-filter: blur(22px) saturate(160%);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 28px;
+  color: #16161a;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.75), inset 0 -1px 0 rgba(0, 0, 0, 0.04);
+  padding: 12px 16px 13px 13px;
+}
+.sms-card.ios .sms-ic {
+  background: linear-gradient(180deg, #c6d0ec, #8ea3d6);
+  color: #ffffff;
+  border-radius: 50%;
+  flex: 0 0 42px; width: 42px; height: 42px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 4px 10px rgba(0, 0, 0, 0.18);
+}
+.sms-card.ios .sms-head { color: #7a7a80; font-size: 12.5px; }
+.sms-card.ios .sms-head b { color: #111113; font-size: 15.5px; font-weight: 700; letter-spacing: 0; }
+.sms-card.ios .sms-body p { color: #232326; font-size: 14px; line-height: 1.38; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.sms-card.ios .sms-body p b { color: #111113; font-weight: 600; }
+.sms-card.ios .sms-x { display: none; }
+.sms-card.ios::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(115deg, transparent 32%, rgba(255, 255, 255, 0.20) 48%, transparent 62%);
+  transform: translateX(-130%);
+}
+.sms-alert.show .sms-card.ios { animation: smsLiquidIn 0.72s cubic-bezier(0.28, 1.2, 0.36, 1) both; }
+.sms-alert.show .sms-card.ios::after { animation: smsSheen 1.5s 0.5s ease forwards; }
+@keyframes smsLiquidIn {
+  0% { transform: translateY(-135%) scale(1.07, 0.9); opacity: 0; }
+  55% { transform: translateY(7px) scale(0.982, 1.018); opacity: 1; }
+  76% { transform: translateY(-2px) scale(1.005, 0.997); }
+  100% { transform: translateY(0) scale(1, 1); opacity: 1; }
+}
+@keyframes smsSheen { to { transform: translateX(130%); } }
+@media (prefers-reduced-motion: reduce) { .sms-alert.show .sms-card.ios { animation: none; } .sms-card.ios::after { display: none; } }
+
+/* Withdrawal success card (Prince, 2026-11-05 — modelled on the MoMo
+   app's confirmation popup in his screenshot): white card, green
+   check, big green amount, two footer actions. Admin portals only;
+   appears together with the SMS banner on a withdrawal confirm. */
+.pay-overlay { position: fixed; inset: 0; z-index: 96; background: rgba(8, 10, 8, 0.5); display: flex; align-items: center; justify-content: center; padding: 18px; opacity: 0; transition: opacity 0.25s ease; }
+.pay-overlay.show { opacity: 1; }
+.pay-card { background: #ffffff; color: #1c1c1e; width: min(400px, 100%); border-radius: 18px; padding: 28px 22px 0; text-align: center; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4); transform: scale(0.92) translateY(10px); transition: transform 0.32s cubic-bezier(0.22, 1.3, 0.36, 1); overflow: hidden; }
+.pay-overlay.show .pay-card { transform: scale(1) translateY(0); }
+.pay-check { width: 66px; height: 66px; margin: 0 auto 14px; border-radius: 50%; background: #e4f7ea; color: #22a550; display: flex; align-items: center; justify-content: center; animation: payPop 0.45s 0.1s cubic-bezier(0.22, 1.5, 0.36, 1) both; }
+.pay-check svg { width: 34px; height: 34px; }
+@keyframes payPop { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.pay-title { font-size: 20px; font-weight: 800; }
+.pay-sub { color: #6b6b70; font-size: 14px; line-height: 1.5; margin: 8px 0 0; }
+.pay-amt { color: #1da356; font-size: 31px; font-weight: 800; margin-top: 16px; }
+.pay-ref { color: #8a8a8e; font-size: 13px; margin-top: 6px; }
+.pay-actions { display: flex; margin: 20px -22px 0; border-top: 1px solid #ececf0; }
+.pay-actions button { flex: 1; background: none; border: none; padding: 15px 0; font-size: 15px; font-weight: 700; color: #1da356; cursor: pointer; font-family: inherit; }
+.pay-actions button + button { border-left: 1px solid #ececf0; }
+
+/* SMS body truncation (Prince, 2026-11-05): the message clamps to
+   three lines ending in an ellipsis, like a real phone notification,
+   so the card never grows tall however long the text runs. */
+.sms-body p { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* deploy nudge 2026-11-05 */
+
+/* Same app icon as the real MobileMoney banner: avatar + green Messages badge */
+.sms-ic svg.sms-face { width: 29px; height: 29px; }
+.sms-ic .sms-badge { position: absolute; right: -4px; bottom: -4px; width: 17px; height: 17px; border-radius: 5px; background: #35c759; border: 1.5px solid #ffffff; display: flex; align-items: center; justify-content: center; }
+.sms-ic .sms-badge svg { width: 11px; height: 11px; }
+/* The real generated Winning Cup (transparent PNG) */
+.cupimg { height: 86px; width: auto; flex: none; filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.55)); }
+.cupimg.big { height: 158px; }
+.cuphead .cupimg { display: block; margin: 0 auto 8px; }
+
+/* Win celebration popup (2026-11-05) */
+.win-overlay { position: fixed; inset: 0; z-index: 97; background: rgba(0, 0, 0, 0.74); display: flex; align-items: center; justify-content: center; padding: 14px; }
+.win-card { width: min(430px, 100%); max-height: 94vh; overflow-y: auto; background: linear-gradient(180deg, #0d120c, #070907); border: 1px solid #6d5518; border-radius: 20px; overflow: hidden; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6); animation: payPop 0.45s cubic-bezier(0.22, 1.36, 0.36, 1); text-align: center; }
+.win-art { position: relative; margin-top: 4px; }
+.win-art img { height: 252px; width: auto; max-width: 92%; display: block; margin: 0 auto; filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.55)); }
+.win-congrats { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.win-mini { width: 17px; height: 17px; color: #00c853; display: inline-flex; flex: none; }
+.win-mini svg { width: 100%; height: 100%; }
+.win-confetti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.win-confetti i { position: absolute; top: -14px; width: 7px; height: 12px; border-radius: 2px; opacity: 0; animation-name: winFall; animation-timing-function: linear; animation-fill-mode: forwards; }
+@keyframes winFall { 8% { opacity: 1; } 100% { transform: translateY(280px) rotate(560deg); opacity: 0.85; } }
+.win-body { padding: 14px 20px 20px; }
+.win-congrats { color: #00d563; font-weight: 700; letter-spacing: 1.5px; font-size: 14px; }
+.win-youwon { color: #ffffff; font-size: 34px; font-weight: 800; margin-top: 2px; }
+.win-amt-label { color: #9aa79a; font-size: 13px; margin-top: 12px; }
+.win-amt { color: #3ee08a; font-size: 31px; font-weight: 800; }
+.win-pct { margin-top: 14px; background: linear-gradient(120deg, #2c2105, #54400d 55%, #2c2105); border: 1px solid #6d5518; border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+.win-pct strong { color: #86efac; font-size: 13.5px; letter-spacing: 0.4px; }
+.win-pct span { color: #b9ac7d; font-size: 11px; }
+.win-verify { color: #9aa79a; font-size: 13px; margin-top: 12px; }
+.win-verify b { color: #ffffff; letter-spacing: 1px; }
+.win-actions { display: flex; gap: 10px; margin-top: 14px; }
+.win-btn { flex: 1; padding: 12px; border-radius: 10px; font: inherit; font-weight: 700; cursor: pointer; }
+.win-btn.ghost { background: transparent; border: 1px solid #3d443d; color: #ffffff; }
+.win-btn.go { background: #22c55e; border: 0; color: #04150a; }
+.win-share { margin-top: 13px; background: none; border: 0; color: #c9d1c9; font: inherit; font-size: 13.5px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .win-confetti i { animation: none; } .win-card { animation: none; } }
+
+/* Bet placed — booking code share panel (2026-11-06, StakePro) */
+.bp-overlay { position: fixed; inset: 0; z-index: 98; background: rgba(3,6,4,.72); display: flex; align-items: center; justify-content: center; padding: 18px; opacity: 0; transition: opacity .18s ease; }
+.bp-overlay.show { opacity: 1; }
+.bp-card { background: linear-gradient(165deg, #12241a, #070a08); border: 1px solid #6d5518; border-radius: 18px; color: #f2f2ea; max-width: 400px; width: 100%; padding: 26px 22px 14px; text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,.55); animation: payPop .38s cubic-bezier(.2,1.6,.4,1); }
+.bp-check { width: 58px; height: 58px; margin: 0 auto 10px; border-radius: 50%; border: 2px solid #00c853; color: #00c853; display: flex; align-items: center; justify-content: center; }
+.bp-check svg { width: 30px; height: 30px; }
+.bp-card h3 { margin: 4px 0 2px; font-size: 22px; }
+.bp-sub { color: #9aa79a; margin: 0 0 16px; font-size: 13.5px; }
+.bp-codebox { border: 1px dashed #6d5518; border-radius: 14px; padding: 14px 12px 12px; display: flex; flex-direction: column; gap: 4px; background: rgba(245,179,1,.06); }
+.bp-label { font-size: 11px; letter-spacing: .14em; color: #c9a227; font-weight: 700; }
+.bp-code { font-size: 34px; font-weight: 800; letter-spacing: .12em; color: #3ee08a; line-height: 1.15; }
+.bp-note { font-size: 12.5px; color: #9aa79a; }
+.bp-actions { display: flex; gap: 10px; margin-top: 16px; }
+.bp-actions .btn { flex: 1; }
+.bp-done { margin-top: 10px; background: none; border: 0; color: #c9c9c9; font-weight: 700; cursor: pointer; padding: 8px; }
+.bkcode { letter-spacing: .08em; color: #3ee08a; }
+/* Bets list + detail upgrade (2026-11-08, Prince's reference) */
+.bt-tabs { display: flex; gap: 8px; margin: 4px 0 14px; }
+.bt-tab { flex: 1; padding: 11px 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-weight: 700; font-size: 15px; cursor: pointer; }
+.bt-tab.on { background: var(--card-dark); border-color: var(--gold); color: var(--gold); }
+.bchips { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 14px; }
+.bchip { padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-weight: 600; cursor: pointer; }
+.bchip.on { background: var(--gold); border-color: var(--gold); color: var(--accent-ink); }
+.bcard { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin: 0 0 14px; }
+.bcard-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.bcard-code { color: var(--gold); font-size: 19px; letter-spacing: .4px; }
+.bcard-sub { color: var(--muted); margin: 5px 0 0; font-size: 13.5px; }
+.bcard-live { margin: 9px 0 0; font-size: 13.5px; color: var(--ink); display: flex; align-items: center; gap: 7px; }
+.livedot { width: 8px; height: 8px; border-radius: 50%; background: var(--live); animation: pulseDot 1.2s ease-in-out infinite; flex: none; }
+.bcard-cols { display: flex; gap: 10px; margin-top: 13px; }
+.bcard-cols > span { flex: 1; color: var(--muted); font-size: 12.5px; display: flex; flex-direction: column; gap: 3px; }
+.bcard-cols b { color: var(--ink); font-size: 16px; }
+.bcard-cols b.paidwin { color: var(--win); }
+.bcard .cashout-btn { width: 100%; margin-top: 13px; }
+.bcard-foot { width: 100%; margin-top: 13px; padding-top: 12px; border: 0; border-top: 1px solid var(--line); background: none; color: var(--gold); font-weight: 700; font-size: 15px; cursor: pointer; }
+.bcard-foot span { font-size: 17px; }
+.bsheet { background: var(--surface); max-width: 560px; margin: 0 auto; min-height: 100dvh; padding: 16px 16px 96px; overflow-y: auto; max-height: 100dvh; }
+.bd-head { display: flex; align-items: center; gap: 10px; }
+.bd-head h3 { margin: 0; font-size: 19px; }
+.bd-meta { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; color: var(--muted); font-size: 13.5px; margin-top: 12px; }
+.bd-copy { background: none; border: 1px solid var(--line); border-radius: 8px; color: var(--gold); padding: 2px 9px; font-weight: 700; cursor: pointer; }
+.bd-title { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+.bd-title > b { font-size: 21px; }
+.bd-status { font-weight: 800; display: inline-flex; align-items: center; gap: 6px; }
+.bd-status svg { width: 20px; height: 20px; }
+.bd-status.won { color: var(--win); }
+.bd-status.lost { color: var(--live); }
+.bd-status.cashed_out { color: var(--gold); }
+.bd-retlabel { color: var(--muted); margin: 16px 0 2px; }
+.bd-return { font-size: 34px; font-weight: 800; margin: 0; }
+.bd-return.won { color: var(--win); }
+.wonbanner { display: flex; align-items: center; gap: 12px; background: linear-gradient(90deg, #d9a40a, var(--gold)); border-radius: 14px; padding: 13px 14px; margin: 18px 0 6px; color: #141414; }
+.wb-ic { width: 42px; height: 42px; border-radius: 50%; background: rgba(0,0,0,.18); display: grid; place-items: center; flex: none; }
+.wb-ic svg { width: 24px; height: 24px; }
+.wb-txt { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.wb-txt b { font-size: 18px; }
+.wb-txt i { font-style: normal; font-weight: 600; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wb-btn { background: #141414; color: #fff; border: 0; flex: none; }
+.bd-legs { margin-top: 14px; display: flex; flex-direction: column; gap: 12px; }
+.bleg { display: flex; gap: 11px; background: var(--card-dark); border: 1px solid var(--line); border-radius: 14px; padding: 13px; }
+.bleg-ic { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; font-weight: 800; flex: none; border: 2px solid var(--muted); color: var(--muted); }
+.bleg-ic.won { border-color: var(--win); color: var(--win); }
+.bleg-ic.lost { border-color: var(--live); color: var(--live); }
+.bleg-ic.live { border-color: var(--live); color: var(--live); animation: pulseDot 1.2s ease-in-out infinite; }
+.bleg-main { flex: 1; min-width: 0; }
+.bleg-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+.bleg-teams { margin-top: 9px; background: rgba(255,255,255,.04); border-radius: 10px; padding: 9px 11px; }
+.bleg-teams > div { display: flex; justify-content: space-between; padding: 3px 0; }
+.bleg-ft { margin: 8px 0 0; color: var(--muted); }
+.bleg-ft b { color: var(--ink); }
+.bleg-rows { margin-top: 9px; background: rgba(255,255,255,.04); border-radius: 10px; padding: 9px 11px; }
+.bleg-rows > div { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; }
+.bleg-rows span { color: var(--muted); }
+.bd-actions { position: sticky; bottom: 0; display: flex; gap: 9px; padding: 12px 0 4px; background: var(--surface); }
+.bd-actions .btn { flex: 1; }
+.bd-actions .btn[disabled] { opacity: .45; }
+
+
+/* Bets: live leg extras (2026-11-06) */
+.legtime { color: #8a978d; font-size: 11.5px; }
+.nowodds { font-weight: 700; font-size: 12.5px; }
+.now-up { color: #e5484d; }
+.now-down { color: #2fbf71; }
+.goldval { color: #3ee08a; }
+
+/* Support chat (player chat box + super admin Messages dashboard) */
+.chat-list { display: flex; flex-direction: column; gap: 8px; max-height: 340px; overflow-y: auto; padding: 4px 2px 10px; }
+.chat-empty { text-align: center; padding: 14px 0; }
+.chat-row { display: flex; }
+.chat-row.mine { justify-content: flex-end; }
+.chat-bubble { max-width: 82%; padding: 9px 12px; border-radius: 14px; font-size: 14px; line-height: 1.45; overflow-wrap: anywhere; white-space: pre-wrap; }
+.chat-row.mine .chat-bubble { background: #00c853; color: #171106; border-bottom-right-radius: 4px; }
+.chat-row.theirs .chat-bubble { background: #1b251e; border: 1px solid #2c3a30; color: #e8eee9; border-bottom-left-radius: 4px; }
+.chat-time { display: block; font-size: 10px; opacity: .65; margin-top: 4px; text-align: right; }
+.chat-form { display: flex; gap: 8px; margin-top: 10px; }
+.chat-form input { flex: 1; background: #0d130e; border: 1px solid #2c3a30; border-radius: 10px; padding: 11px 12px; color: #e8eee9; font-size: 16px; }
+.mchat { display: grid; grid-template-columns: 280px 1fr; gap: 14px; }
+.mchat-threads { display: flex; flex-direction: column; gap: 6px; max-height: 480px; overflow-y: auto; }
+.mchat-thread { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; text-align: left; background: #131a14; border: 1px solid #263027; border-radius: 12px; padding: 10px 12px; cursor: pointer; color: #e8eee9; font: inherit; }
+.mchat-thread.on { border-color: #00c853; }
+.mchat-tname { font-weight: 700; font-size: 14px; display: flex; gap: 8px; align-items: center; }
+.mchat-badge { background: #00c853; color: #171106; font-size: 11px; font-weight: 800; border-radius: 999px; padding: 1px 7px; }
+.mchat-tprev { font-size: 12px; opacity: .75; overflow-wrap: anywhere; }
+.mchat-ttime { font-size: 11px; opacity: .55; }
+.mchat-main { min-width: 0; }
+@media (max-width: 720px) { .mchat { grid-template-columns: 1fr; } }
+
+/* Messages dashboard v2 — two-pane messenger layout */
+.mchat { grid-template-columns: 300px 1fr; gap: 0; border: 1px solid #263027; border-radius: 14px; overflow: hidden; }
+.mchat-threads { max-height: 600px; padding: 8px; background: #0e130e; }
+.mchat-thread { flex-direction: row; align-items: center; gap: 10px; width: 100%; }
+.mchat-ava { flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid #6d5518; background: #1b251e; color: #00c853; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; }
+.mchat-tcol { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mchat-tprev { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mchat-ttime { flex: none; align-self: flex-start; }
+.mchat-main { display: flex; flex-direction: column; height: 600px; background: #0a0f0a; border-left: 1px solid #263027; }
+.mchat-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid #263027; }
+.mchat-hcol { display: flex; flex-direction: column; }
+.mchat-hphone { font-size: 12px; opacity: .65; }
+.mchat-main .chat-list { flex: 1; max-height: none; padding: 14px; }
+.mchat-main .chat-form { padding: 0 14px 14px; }
+.mchat-idle { margin: auto; }
+@media (max-width: 720px) { .mchat-main { height: 480px; border-left: none; border-top: 1px solid #263027; } .mchat-threads { max-height: 300px; } }
+
+/* Messages stacking fix: this media rule must come AFTER the v2 .mchat
+   rule or the desktop columns win the cascade on phones too. */
+@media (max-width: 720px) { .mchat { grid-template-columns: 1fr; } }
+
+/* 18+ age gate on the register modal (Prince, 2026-11-09). */
+.agegate { text-align: center; padding: 10px 0 4px; }
+.agegate h3 { margin: 0 0 6px; }
+.agegate-row { display: flex; gap: 10px; justify-content: center; margin-top: 14px; }
+.agegate-row .btn { min-width: 110px; }
+
+
+/* ---------- Setup Guide ---------- */
+.ggrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 20px 14px; margin: 6px 0 14px; }
+.gwrap { min-width: 0; }
+.gname { font-size: 12.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--gold, #00d563); margin: 0 0 6px 2px; }
+.gbox { position: relative; background: var(--surface); border: 1.5px dashed var(--line); border-radius: var(--radius); padding: 26px 12px 10px; }
+.gbox .demotag { position: absolute; top: 8px; right: 10px; font-size: 10px; font-weight: 800; letter-spacing: .08em; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 7px; }
+.gbox button:disabled { opacity: .55; cursor: not-allowed; }
+.gsteps { margin: 4px 0 8px; padding-left: 20px; }
+.gsteps li { margin: 0 0 7px; }
+
+/* ---------- Partner dashboard (Admin Portal) + Command centre
+   (Super Portal) — Prince, 2026-11-10. The partner surfaces follow
+   his reference screenshot: near-black cards, subtle borders, gold
+   accents. Like the live band and the bottom bar, these are brand
+   surfaces and stay dark in the light theme too, so their text
+   colours are pinned instead of following the flipped variables. */
+.phero, .pstat, .pwallet, .kpi {
+  background: #131712;
+  border: 1px solid #263028;
+  color: #eef4ef;
+}
+.phero .muted, .pstat .muted, .pwallet .muted, .kpi .muted { color: #97ab9e; }
+.gold-text { color: var(--gold); }
+.mono { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 12px; word-break: break-all; }
+
+/* Partner hero — PARTNER ACCESS CODE */
+.phero { border-radius: 18px; padding: 20px; margin: 0 0 12px; position: relative; }
+.phero-label { display: flex; align-items: center; gap: 7px; color: var(--gold); font-size: 11px; font-weight: 800; letter-spacing: 1.6px; }
+.phero-label svg { width: 14px; height: 14px; flex: none; }
+.phero-copy { position: absolute; top: 16px; right: 16px; width: 42px; height: 42px; border: 0; border-radius: 12px; background: rgba(245, 197, 24, .18); color: var(--gold); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.phero-copy svg { width: 18px; height: 18px; }
+.phero-code { font-size: 34px; font-weight: 800; letter-spacing: 1px; color: #fff; margin: 12px 0 8px; word-break: break-all; line-height: 1.1; }
+.phero-note { color: #a9b8ad; font-size: 13px; line-height: 1.55; margin: 0 0 18px; max-width: 540px; }
+.phero-share-label { font-size: 10px; font-weight: 700; letter-spacing: 1.6px; color: #7d8f83; margin-bottom: 8px; }
+.phero-pill { display: flex; align-items: center; gap: 8px; background: #0a0d0a; border: 1px solid #232b24; border-radius: 12px; padding: 7px 7px 7px 14px; }
+.phero-url { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #cfe0d2; font-size: 13px; }
+.phero-pill-copy { flex: none; width: 34px; height: 34px; border-radius: 9px; border: 1px solid #2c362d; background: #1b201b; color: #e8f0e9; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.phero-pill-copy svg { width: 16px; height: 16px; }
+
+/* Partner stat grid — 2 columns, 4 across on wide screens */
+.pstats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 12px; }
+@media (min-width: 1024px) { .pstats { grid-template-columns: repeat(4, 1fr); } }
+.pstat { border-radius: 16px; padding: 16px; }
+.pstat-top { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; }
+.pchip { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex: none; }
+.pchip svg { width: 18px; height: 18px; }
+.pchip.orange { background: rgba(245, 158, 11, .16); color: #ffa726; }
+.pchip.green { background: rgba(47, 191, 113, .16); color: #2fbf71; }
+.pchip.red { background: rgba(255, 71, 87, .14); color: #ff5b6a; }
+.pchip.gold { background: rgba(245, 197, 24, .16); color: var(--gold); }
+.pstat-l { font-size: 10.5px; font-weight: 700; letter-spacing: 1.1px; color: #8fa295; text-transform: uppercase; line-height: 1.35; }
+.pstat-v { font-size: 24px; font-weight: 800; color: #fff; line-height: 1.15; }
+.pstat-cur { font-size: 12px; font-weight: 600; color: #8fa295; }
+.pstat-c { font-size: 12px; color: #8fa295; margin-top: 6px; line-height: 1.45; }
+
+/* Betting Wallet */
+.pwallet { border-radius: 16px; padding: 18px; margin: 0 0 14px; }
+.pwallet-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.pwallet-head h3 { margin: 0; color: #fff; font-size: 16px; }
+.pwallet-l { font-size: 10.5px; font-weight: 700; letter-spacing: 1.1px; color: #8fa295; text-transform: uppercase; }
+.pwallet-amt { font-size: 28px; font-weight: 800; color: #fff; margin: 6px 0 4px; line-height: 1.15; }
+.pwallet-amt .pstat-cur { font-size: 14px; }
+.pwallet .card-row { border-top-color: #263028; }
+.pwallet .btn { margin: 6px 0 10px; }
+
+/* Super Portal command centre — denser than the partner side */
+.kpi-band { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 0 0 12px; }
+@media (min-width: 760px) { .kpi-band { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 1180px) { .kpi-band { grid-template-columns: repeat(8, 1fr); } }
+.kpi { border-radius: 12px; padding: 11px 12px; }
+.kpi-l { font-size: 9.5px; font-weight: 700; letter-spacing: 1.1px; color: #8fa295; text-transform: uppercase; line-height: 1.4; }
+.kpi-v { font-size: 18px; font-weight: 800; color: #fff; margin: 4px 0 2px; line-height: 1.2; word-break: break-word; }
+.kpi-s { font-size: 11px; color: #8fa295; line-height: 1.4; }
+.cc-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 0 0 2px; }
+@media (min-width: 960px) { .cc-grid { grid-template-columns: 1.15fr .85fr; } }
+.cc-col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.cc-col .card { margin-bottom: 0; }
+.status-row { display: flex; align-items: flex-start; padding: 5px 0; font-size: 13px; line-height: 1.45; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin: 5px 8px 0 0; flex: none; }
+.dot-g { background: #2fbf71; }
+.dot-r { background: #ff4757; }
+.dot-a { background: #f5a623; }
+.trend-svg { width: 100%; height: auto; display: block; }
+.lb-wrap { overflow-x: auto; }
+.lb-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.lb-table th, .lb-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.lb-table th { font-size: 11px; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); }
+.lb-table .num { text-align: right; white-space: nowrap; }
+.lb-table tfoot td { border-bottom: 0; border-top: 2px solid var(--line); }
+
+/* Per-admin commission editor (Users tab, super portal) */
+.commcell { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.commcell .comm-inp { width: 76px; padding: 5px 8px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-2, transparent); color: inherit; }

@@ -41,6 +41,10 @@ module.exports = guard(async (req, res) => {
                        where t.user_id = u.id and t.kind = 'deposit' and t.status = 'completed')`, [auth.uid])
   ]);
   const settings = await getSettings(['admin_commission_pct']);
+  // The viewer's own override, if the super admin set one (2026-11-10):
+  // the dashboard reports the EFFECTIVE rate the viewer actually earns.
+  const myPctRows = await sql('select commission_pct from users where id = $1', [auth.uid]);
+  const myOverride = myPctRows.length && myPctRows[0].commission_pct != null ? Number(myPctRows[0].commission_pct) : null;
   const myReqRows = await sql(
     `select id, amount_ghs, created_at from commission_payout_requests
      where earner_id = $1 and status = 'pending'`, [auth.uid]);
@@ -58,12 +62,13 @@ module.exports = guard(async (req, res) => {
     payout_request: myReqRows.length ? { ...myReqRows[0], amount_ghs: Number(myReqRows[0].amount_ghs) } : null,
     daily_earnings: daily.map(r => ({ date: r.day, deposits_n: Number(r.deposits_n), earned_ghs: Number(r.earned_ghs) })),
     referrals_with_deposit: withDep.length ? Number(withDep[0].n) : 0,
-    commission_pct: Number(settings.admin_commission_pct || 0)
+    commission_pct: myOverride != null ? myOverride : Number(settings.admin_commission_pct || 0),
+    commission_pct_custom: myOverride
   };
 
   if (auth.role === 'super_admin') {
     const admins = await sql(
-      `select u.id, u.phone, u.display_name, u.role,
+      `select u.id, u.phone, u.display_name, u.role, u.commission_pct,
               coalesce(sum(c.amount_ghs), 0) as earned,
               coalesce(sum(c.amount_ghs) filter (where c.paid_at is not null), 0) as paid,
               coalesce(sum(c.amount_ghs) filter (where c.paid_at is null), 0) as pending,
@@ -74,7 +79,7 @@ module.exports = guard(async (req, res) => {
           or exists (select 1 from commissions cx where cx.earner_id = u.id)
        group by u.id order by pending desc`
     );
-    out.admins = admins.map(a => ({ ...a, earned: Number(a.earned), paid: Number(a.paid), pending: Number(a.pending), payout_requested_ghs: a.payout_requested_ghs == null ? null : Number(a.payout_requested_ghs), invited_count: Number(a.invited_count) }));
+    out.admins = admins.map(a => ({ ...a, earned: Number(a.earned), paid: Number(a.paid), pending: Number(a.pending), payout_requested_ghs: a.payout_requested_ghs == null ? null : Number(a.payout_requested_ghs), invited_count: Number(a.invited_count), commission_pct: a.commission_pct == null ? null : Number(a.commission_pct) }));
   }
   send(res, 200, out);
 });

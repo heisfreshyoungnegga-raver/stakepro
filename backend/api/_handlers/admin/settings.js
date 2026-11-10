@@ -1,6 +1,6 @@
 const { sql, readBody, send, guard, requireAdmin, requireSuperAdmin, ensureAdminTables, getSettings } = require('../../_lib');
 
-const KEYS = ['gateway_enabled', 'payouts_frozen', 'admin_commission_pct', 'user_cashback_pct', 'referral_deposit_bonus_ghs', 'referral_deposit_bonus_ngn', 'cashout_margin_pct', 'fx_ngn_per_ghs', 'deposit_bonus_ghs_ratio', 'deposit_bonus_ngn_ratio'];
+const KEYS = ['gateway_enabled', 'payouts_frozen', 'admin_commission_pct', 'user_cashback_pct', 'referral_deposit_bonus_ghs', 'referral_deposit_bonus_ngn', 'cashout_margin_pct', 'fx_ngn_per_ghs', 'deposit_bonus_ghs_ratio', 'deposit_bonus_ngn_ratio', 'deposit_min_ghs'];
 
 // Platform control settings. Any admin can read them (dashboards show
 // the state); only the super admin can change them: the ShinobiPay
@@ -49,6 +49,12 @@ module.exports = guard(async (req, res) => {
       if (!(v >= 0 && v <= 1)) return send(res, 400, { error: 'invalid_bonus_ratio', detail: 'Bonus ratios must be between 0 and 1.' });
       updates[k] = String(v);
     }
+  }
+  if (body.deposit_min_ghs !== undefined) {
+    const v = Number(body.deposit_min_ghs);
+    // Super-admin controlled MoMo deposit floor (Prince, 2026-11-10).
+    if (!(v >= 10 && v <= 5000)) return send(res, 400, { error: 'invalid_deposit_min', detail: 'Minimum deposit must be between GHS 10 and GHS 5,000.' });
+    updates.deposit_min_ghs = String(v);
   }
   if (body.referral_deposit_bonus_ghs !== undefined) {
     const v = Number(body.referral_deposit_bonus_ghs);

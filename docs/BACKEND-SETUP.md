@@ -133,3 +133,19 @@ adapter job — the equivalent of StakeKing's adapter, but translating
 Inertia shapes instead of Supabase shapes. Until that job is done,
 the live preview stays a static site: login, bets and deposits remain
 inactive even though the database and backend now exist.
+
+## Migration 2026-11-10 (per-admin commission + minimum deposit)
+
+- File: backend/db/migration-2026-11-10-commission.sql — adds
+  `users.commission_pct numeric(6,2)` (nullable) and seeds
+  `operator_settings.deposit_min_ghs = '210'`.
+- Applied to the Neon stakepro project (young-star-84380658) on
+  2026-11-10 via the Neon MCP connector: the ALTER and the settings
+  insert ran in one transaction; verified by reading the column back
+  from information_schema and the setting row from operator_settings.
+- Both changes also self-apply at runtime through ensureAdminTables
+  in api/_lib.js, so any fresh database converges without the file.
+- Backend redeployed to stakepro-api afterwards
+  (dpl_Ds42iU72u2NTq2zHmosjfDfa2M4W); /api/matches and the new
+  /api/admin/set-commission route answer the 503
+  backend_not_configured guard until env vars are set.

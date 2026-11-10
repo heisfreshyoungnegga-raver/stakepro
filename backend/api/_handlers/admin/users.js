@@ -9,7 +9,7 @@ module.exports = guard(async (req, res) => {
   // admin sees everyone ($1 = null).
   const scope = auth.role === 'super_admin' ? null : auth.uid;
   const rows = await sql(
-    `select u.id, u.phone, u.display_name, u.role, u.status, u.balance_ghs, u.created_at,
+    `select u.id, u.phone, u.display_name, u.role, u.status, u.balance_ghs, u.created_at, u.commission_pct,
             u.invited_by, i.phone as inviter_phone,
             completed_deposit_count(u.id) as deposits_completed,
             (select count(*) from bets b where b.user_id = u.id) as bets_count
@@ -20,5 +20,5 @@ module.exports = guard(async (req, res) => {
      limit 200`,
     [scope]
   );
-  send(res, 200, { users: rows.map(u => ({ ...u, balance_ghs: Number(u.balance_ghs) })) });
+  send(res, 200, { users: rows.map(u => ({ ...u, balance_ghs: Number(u.balance_ghs), commission_pct: u.commission_pct == null ? null : Number(u.commission_pct) })) });
 });

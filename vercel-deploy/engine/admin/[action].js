@@ -11,6 +11,7 @@ const handlers = {
   support: require('../_handlers/admin/support'),
   'espn-sync': require('../_handlers/admin/espn-sync'),
   promote: require('../_handlers/admin/promote'),
+  'set-commission': require('../_handlers/admin/set-commission'),
   settings: require('../_handlers/admin/settings'),
   'create-match': require('../_handlers/admin/create-match'),
   'odds-preview': require('../_handlers/admin/odds-preview'),

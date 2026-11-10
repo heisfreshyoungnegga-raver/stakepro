@@ -1200,6 +1200,12 @@ function ensureBetColumns() {
       await sql(`alter table bets add column if not exists bonus_pct numeric not null default 0`);
       await sql(`alter table bets add column if not exists system_label text`);
       await sql(`alter table bets add column if not exists payout_ghs numeric`);
+      // place.js stamps every ticket with the slip's booking code, but
+      // no migration ever created the column — on a fresh database the
+      // first bet placement died with a 500 (found in the 2026-11-10
+      // overnight parity run; live Oddaroa carries the column from an
+      // unsaved live change). Ensure it here like the others.
+      await sql(`alter table bets add column if not exists booking_code text`);
     })().catch(e => { betColsReady = null; throw e; });
   }
   return betColsReady;
@@ -1236,6 +1242,13 @@ function ensureMatchColumns() {
       // it and /api/matches 500'd until it was added by hand on
       // 2026-11-09. Self-heal it here like the others.
       await msql(`alter table matches add column if not exists odds_full jsonb`);
+      // Half-time scores: written by the API-Football upsert and read by
+      // settleMatch for HT markets. Live Oddaroa's matches table carries
+      // them, but no shipped migration created them — a fresh database
+      // 500'd every match settlement (found in the 2026-11-10 overnight
+      // parity run). Self-heal here like the others.
+      await msql(`alter table matches add column if not exists score_home_ht int`);
+      await msql(`alter table matches add column if not exists score_away_ht int`);
       // 'postponed' joined the status vocabulary with the created-
       // games lifecycle (2026-11-05); the original CHECK only knew
       // upcoming/live/finished and rejected postponed games. The swap
